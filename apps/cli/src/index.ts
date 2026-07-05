@@ -14,6 +14,7 @@ import {
   renderCustomerRecommendations,
   renderCustomers,
   renderEmbeddingRecommendations,
+  renderEvaluation,
   renderEvents,
   renderFeedback,
   renderGraph,
@@ -171,6 +172,19 @@ program
     if (!items) return;
     heading(`Embedding recommendations: ${customer}`);
     renderEmbeddingRecommendations(items);
+  });
+
+program
+  .command("evaluate")
+  .description("benchmark strategies with leave-one-out (hit-rate, MRR)")
+  .option("-k, --k <n>", "cutoff for top-k metrics", "5")
+  .action(async (options) => {
+    const report = await withSpinner("Running leave-one-out benchmark", () =>
+      client().evaluate(Number(options.k)),
+    );
+    if (!report) return;
+    heading("Strategy benchmark");
+    renderEvaluation(report);
   });
 
 program

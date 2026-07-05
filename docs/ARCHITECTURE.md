@@ -45,6 +45,7 @@ Recommendation Engine
 - `packages/embeddings`: co-occurrence product embeddings and taste-profile scoring
 - `packages/trends`: windowed trend/momentum signals
 - `packages/hybrid`: weighted, explainable blend of the ranking signals
+- `packages/evaluation`: offline leave-one-out benchmark across strategies
 - `packages/engine`: orchestration layer over ingestion and queries
 - `apps/api`: local HTTP API for manual testing
 - `apps/cli`: HTTP client CLI (tables, colors, interactive purchase, dataset seeding)

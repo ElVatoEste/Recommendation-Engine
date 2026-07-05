@@ -6,6 +6,7 @@ import type {
   CustomerRecommendation,
   CustomerSimilarity,
   EmbeddingRecommendation,
+  EvaluationReport,
   FeedbackStats,
   HybridRecommendation,
   ProductSimilarity,
@@ -175,6 +176,10 @@ export class RecommendationApiClient {
 
   graph(): Promise<CoPurchaseGraph> {
     return this.request<CoPurchaseGraph>("/graph");
+  }
+
+  evaluate(k: number): Promise<EvaluationReport> {
+    return this.request<EvaluationReport>(`/evaluate?k=${k}`);
   }
 
   async similarProducts(

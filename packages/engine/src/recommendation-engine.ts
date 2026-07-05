@@ -3,6 +3,7 @@ import {
   CustomerProfileTracker,
 } from "../../customers/src/index.ts";
 import { ProductEmbeddingIndex } from "../../embeddings/src/index.ts";
+import { Evaluator } from "../../evaluation/src/index.ts";
 import { RecommendationFeedbackTracker } from "../../feedback/src/index.ts";
 import { CoPurchaseGraphTracker } from "../../graph/src/index.ts";
 import { HybridRecommender } from "../../hybrid/src/index.ts";
@@ -19,6 +20,7 @@ import {
   type CustomerSimilarity,
   type EmbeddingRecommendation,
   type EngineSnapshot,
+  type EvaluationReport,
   type ProductSimilarity,
   type EventStore,
   type FeedbackStats,
@@ -37,6 +39,7 @@ export class RecommendationEngine {
   private readonly coPurchaseGraph = new CoPurchaseGraphTracker();
   private readonly collaborative = new CollaborativeRecommender();
   private readonly customers = new CustomerProfileTracker();
+  private readonly evaluator = new Evaluator();
   private readonly feedback = new RecommendationFeedbackTracker();
   private readonly hybrid = new HybridRecommender();
   private readonly ranker = new PopularProductsRanker();
@@ -214,6 +217,21 @@ export class RecommendationEngine {
       owned,
       limit,
     );
+  }
+
+  /** Offline leave-one-out benchmark across the ranking strategies. */
+  evaluate(k = 5): EvaluationReport {
+    const stats = this.statistics.getAllProductStats();
+    const popularityOrder = this.ranker
+      .rank(stats, stats.length)
+      .map((recommendation) => recommendation.productId);
+
+    return this.evaluator.evaluate({
+      customerSets: this.customers.getProductSets(),
+      popularityOrder,
+      graph: this.getGraph(),
+      k,
+    });
   }
 
   getGraph(): CoPurchaseGraph {

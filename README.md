@@ -96,6 +96,7 @@ bun run cli hybrid c-1 --w-collab 1 --w-pop 0 --w-assoc 0 --w-trend 0
 bun run cli trending                  # products with recent momentum
 bun run cli similar-products bread    # embedding neighbors (shared context)
 bun run cli embedding c-1             # embedding-based recommendations
+bun run cli evaluate                  # leave-one-out benchmark of strategies
 bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
@@ -122,6 +123,7 @@ Available routes:
 - `GET /recommendations/popular?limit=5`
 - `GET /recommendations/hybrid?customer=c-1&limit=5` (optional `wPop`, `wAssoc`, `wCollab`, `wTrend` weights)
 - `GET /recommendations/trending?limit=5&windowDays=30`
+- `GET /evaluate?k=5` — leave-one-out benchmark across strategies
 - `GET /stats/products`
 - `GET /graph/co-purchases?productId=bread&limit=5`
 - `GET /associations?productId=bread&limit=5`
@@ -218,6 +220,7 @@ packages/
   engine/               orchestration layer
   customers/            customer profiles + collaborative filtering
   embeddings/           co-occurrence product embeddings
+  evaluation/           leave-one-out strategy benchmark
   feedback/             recommendation feedback tracker
   graph/                co-purchase graph
   hybrid/               weighted multi-signal ranking

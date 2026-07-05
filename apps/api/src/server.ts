@@ -165,6 +165,12 @@ async function main(): Promise<void> {
         return;
       }
 
+      if (method === "GET" && url.pathname === "/evaluate") {
+        const k = Number(url.searchParams.get("k") ?? "5");
+        sendJson(response, 200, engine.evaluate(k));
+        return;
+      }
+
       if (method === "GET" && url.pathname === "/stats/products") {
         sendJson(response, 200, {
           products: engine.getSnapshot().productStats,
@@ -328,6 +334,7 @@ async function main(): Promise<void> {
           "GET /recommendations/popular?limit=5",
           "GET /recommendations/hybrid?customer=c-1&limit=5",
           "GET /recommendations/trending?limit=5&windowDays=30",
+          "GET /evaluate?k=5",
           "GET /stats/products",
           "GET /graph/co-purchases?productId=bread&limit=5",
           "GET /associations?productId=bread&limit=5",

@@ -217,6 +217,19 @@ export interface CoPurchaseGraph {
   edges: GraphEdge[];
 }
 
+export interface EvaluationStrategyResult {
+  strategy: string;
+  hitRate: number;
+  mrr: number;
+  precision: number;
+}
+
+export interface EvaluationReport {
+  k: number;
+  customersEvaluated: number;
+  strategies: EvaluationStrategyResult[];
+}
+
 export interface EngineSnapshot {
   totalEvents: number;
   totalPurchases: number;

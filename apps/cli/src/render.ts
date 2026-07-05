@@ -9,6 +9,7 @@ import type {
   CustomerRecommendation,
   CustomerSimilarity,
   EmbeddingRecommendation,
+  EvaluationReport,
   FeedbackStats,
   HybridRecommendation,
   ProductSimilarity,
@@ -206,6 +207,29 @@ export function renderEmbeddingRecommendations(
   for (const item of items) {
     t.push([pc.bold(item.productId), pc.yellow(item.score.toFixed(4)), pc.dim(item.reason)]);
   }
+  console.log(t.toString());
+}
+
+export function renderEvaluation(report: EvaluationReport): void {
+  console.log(
+    `  ${pc.dim("leave-one-out over")} ${pc.bold(String(report.customersEvaluated))} ` +
+      `${pc.dim("customers · metrics @")}${pc.bold(String(report.k))}`,
+  );
+
+  if (report.customersEvaluated === 0) {
+    return renderEmpty("not enough multi-product customers to evaluate");
+  }
+
+  const t = table(["Strategy", `HitRate@${report.k}`, "MRR", `Precision@${report.k}`]);
+  report.strategies.forEach((s, index) => {
+    const name = index === 0 ? pc.green(pc.bold(s.strategy)) : pc.bold(s.strategy);
+    t.push([
+      name,
+      pc.yellow(s.hitRate.toFixed(4)),
+      s.mrr.toFixed(4),
+      s.precision.toFixed(4),
+    ]);
+  });
   console.log(t.toString());
 }
 
