@@ -13,6 +13,7 @@ import type {
   PopularRecommendation,
   ProductStats,
   RecommendationEvent,
+  TrendStat,
 } from "../../../packages/shared/src/index.ts";
 
 const TABLE_STYLE = {
@@ -167,7 +168,7 @@ function bar(value: number): string {
 export function renderHybrid(items: HybridRecommendation[]): void {
   if (items.length === 0) return renderEmpty("no recommendations yet");
 
-  const t = table(["Product", "Score", "Pop", "Assoc", "Collab", "Why"]);
+  const t = table(["Product", "Score", "Pop", "Assoc", "Collab", "Trend", "Why"]);
   for (const item of items) {
     t.push([
       pc.bold(item.productId),
@@ -175,6 +176,30 @@ export function renderHybrid(items: HybridRecommendation[]): void {
       bar(item.components.popularity),
       bar(item.components.association),
       bar(item.components.collaborative),
+      bar(item.components.trend),
+      pc.dim(item.reason),
+    ]);
+  }
+  console.log(t.toString());
+}
+
+export function renderTrends(items: TrendStat[]): void {
+  if (items.length === 0) return renderEmpty("no trend data yet");
+
+  const t = table(["Product", "Recent", "Previous", "Growth", "Why"]);
+  for (const item of items) {
+    const growth = `${item.growthRate > 0 ? "+" : ""}${Math.round(item.growthRate * 100)}%`;
+    const colored =
+      item.growthRate > 0
+        ? pc.green(growth)
+        : item.growthRate < 0
+          ? pc.red(growth)
+          : pc.dim(growth);
+    t.push([
+      pc.bold(item.productId),
+      pc.yellow(String(item.recentCount)),
+      String(item.previousCount),
+      colored,
       pc.dim(item.reason),
     ]);
   }

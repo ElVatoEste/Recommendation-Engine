@@ -91,8 +91,9 @@ bun run cli feedback
 bun run cli events --limit 20
 bun run cli customers                 # customer profiles
 bun run cli customer c-1              # profile + collaborative recs + similar
-bun run cli hybrid c-1                # blended popularity + association + collaborative
-bun run cli hybrid c-1 --w-collab 1 --w-pop 0 --w-assoc 0
+bun run cli hybrid c-1                # blended popularity + association + collaborative + trend
+bun run cli hybrid c-1 --w-collab 1 --w-pop 0 --w-assoc 0 --w-trend 0
+bun run cli trending                  # products with recent momentum
 bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
@@ -117,7 +118,8 @@ Available routes:
 
 - `GET /health`
 - `GET /recommendations/popular?limit=5`
-- `GET /recommendations/hybrid?customer=c-1&limit=5` (optional `wPop`, `wAssoc`, `wCollab` weights)
+- `GET /recommendations/hybrid?customer=c-1&limit=5` (optional `wPop`, `wAssoc`, `wCollab`, `wTrend` weights)
+- `GET /recommendations/trending?limit=5&windowDays=30`
 - `GET /stats/products`
 - `GET /graph/co-purchases?productId=bread&limit=5`
 - `GET /associations?productId=bread&limit=5`
@@ -219,6 +221,7 @@ packages/
   similarity/           set-similarity metrics (Jaccard, cosine)
   statistics/           incremental product statistics
   storage/              event storage abstractions
+  trends/               recent-momentum trend signals
 docs/
   ARCHITECTURE.md       current system shape
   ROADMAP.md            project roadmap

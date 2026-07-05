@@ -20,6 +20,7 @@ import {
   renderPopular,
   renderSimilarCustomers,
   renderStats,
+  renderTrends,
 } from "./render.ts";
 import { SAMPLE_FEEDBACK, SAMPLE_ORDERS } from "./seed.ts";
 
@@ -118,16 +119,19 @@ program
   .option("--w-pop <n>", "popularity weight")
   .option("--w-assoc <n>", "association weight")
   .option("--w-collab <n>", "collaborative weight")
+  .option("--w-trend <n>", "trend weight")
   .action(async (customer, options) => {
     const anyWeight =
       options.wPop !== undefined ||
       options.wAssoc !== undefined ||
-      options.wCollab !== undefined;
+      options.wCollab !== undefined ||
+      options.wTrend !== undefined;
     const weights = anyWeight
       ? {
           popularity: Number(options.wPop ?? 0),
           association: Number(options.wAssoc ?? 0),
           collaborative: Number(options.wCollab ?? 0),
+          trend: Number(options.wTrend ?? 0),
         }
       : undefined;
 
@@ -138,6 +142,23 @@ program
     if (!items) return;
     heading(customer ? `Hybrid recommendations: ${customer}` : "Hybrid recommendations");
     renderHybrid(items);
+  });
+
+program
+  .command("trending")
+  .description("show products with the strongest recent momentum")
+  .option("-l, --limit <n>", "number of products", "10")
+  .option("-w, --window <days>", "trend window in days")
+  .action(async (options) => {
+    const items = await withSpinner("Fetching trends", () =>
+      client().trending(
+        Number(options.limit),
+        options.window ? Number(options.window) : undefined,
+      ),
+    );
+    if (!items) return;
+    heading("Trending products");
+    renderTrends(items);
   });
 
 program

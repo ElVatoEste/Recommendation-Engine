@@ -12,6 +12,7 @@ import type {
   ProductStats,
   PurchaseItem,
   RecommendationEvent,
+  TrendStat,
 } from "../../../packages/shared/src/index.ts";
 
 export interface HealthResponse {
@@ -174,6 +175,15 @@ export class RecommendationApiClient {
     return this.request<CoPurchaseGraph>("/graph");
   }
 
+  async trending(limit: number, windowDays?: number): Promise<TrendStat[]> {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (windowDays) params.set("windowDays", String(windowDays));
+    const body = await this.request<{ trends: TrendStat[] }>(
+      `/recommendations/trending?${params.toString()}`,
+    );
+    return body.trends;
+  }
+
   async hybrid(
     customerId: string | undefined,
     limit: number,
@@ -185,6 +195,7 @@ export class RecommendationApiClient {
       params.set("wPop", String(weights.popularity));
       params.set("wAssoc", String(weights.association));
       params.set("wCollab", String(weights.collaborative));
+      params.set("wTrend", String(weights.trend));
     }
 
     const body = await this.request<{ recommendations: HybridRecommendation[] }>(

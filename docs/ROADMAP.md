@@ -38,7 +38,7 @@
 
 - [ ] Embeddings and ML-assisted scoring
 - [x] Hybrid ranking pipeline
-- [ ] Seasonality and trend signals
+- [x] Trend / momentum signals
 - [ ] Evaluation and benchmarking
 
 ## Phase 5 - Production Readiness

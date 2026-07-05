@@ -158,16 +158,27 @@ export interface CustomerRecommendation {
   reason: string;
 }
 
+export interface TrendStat {
+  productId: string;
+  recentCount: number;
+  previousCount: number;
+  growthRate: number;
+  trendScore: number;
+  reason: string;
+}
+
 export interface HybridWeights {
   popularity: number;
   association: number;
   collaborative: number;
+  trend: number;
 }
 
 export interface HybridComponents {
   popularity: number;
   association: number;
   collaborative: number;
+  trend: number;
 }
 
 export interface HybridRecommendation {

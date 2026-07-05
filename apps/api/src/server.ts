@@ -40,13 +40,14 @@ function parseWeights(
     ["wPop", "popularity"],
     ["wAssoc", "association"],
     ["wCollab", "collaborative"],
+    ["wTrend", "trend"],
   ] as const;
 
   if (!keys.some(([query]) => params.has(query))) {
     return undefined;
   }
 
-  const weights = { popularity: 0, association: 0, collaborative: 0 };
+  const weights = { popularity: 0, association: 0, collaborative: 0, trend: 0 };
   for (const [query, key] of keys) {
     const value = Number(params.get(query) ?? "0");
     weights[key] = Number.isFinite(value) && value >= 0 ? value : 0;
@@ -146,6 +147,20 @@ async function main(): Promise<void> {
             limit,
             weights,
           ),
+        });
+        return;
+      }
+
+      if (method === "GET" && url.pathname === "/recommendations/trending") {
+        const limit = Number(url.searchParams.get("limit") ?? "10");
+        const windowParam = url.searchParams.get("windowDays");
+        const windowMs = windowParam
+          ? Number(windowParam) * 24 * 60 * 60 * 1000
+          : undefined;
+
+        sendJson(response, 200, {
+          generatedAt: new Date().toISOString(),
+          trends: engine.getTrends(limit, windowMs),
         });
         return;
       }
@@ -290,6 +305,7 @@ async function main(): Promise<void> {
           "GET /health",
           "GET /recommendations/popular?limit=5",
           "GET /recommendations/hybrid?customer=c-1&limit=5",
+          "GET /recommendations/trending?limit=5&windowDays=30",
           "GET /stats/products",
           "GET /graph/co-purchases?productId=bread&limit=5",
           "GET /associations?productId=bread&limit=5",

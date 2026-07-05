@@ -4,32 +4,36 @@ import type {
   HybridWeights,
 } from "../../shared/src/index.ts";
 
-export interface HybridSignals {
-  popularity: Map<string, number>;
-  association: Map<string, number>;
-  collaborative: Map<string, number>;
-}
+export type HybridSignals = Record<keyof HybridComponents, Map<string, number>>;
+
+const COMPONENTS: Array<keyof HybridComponents> = [
+  "popularity",
+  "association",
+  "collaborative",
+  "trend",
+];
 
 export const DEFAULT_WEIGHTS: HybridWeights = {
-  popularity: 0.2,
-  association: 0.4,
-  collaborative: 0.4,
+  popularity: 0.15,
+  association: 0.3,
+  collaborative: 0.35,
+  trend: 0.2,
 };
 
 const COMPONENT_LABELS: Record<keyof HybridComponents, string> = {
   popularity: "popularidad general",
   association: "asociacion de compra",
   collaborative: "clientes similares a ti",
+  trend: "tendencia reciente",
 };
 
 /**
  * Blends independent recommendation signals into a single explainable score.
  *
- * Each signal has its own scale (popularity is a large integer-ish score,
- * association is a lift-derived value, collaborative is a sum of similarities),
- * so every signal is min-max normalized to [0, 1] before weighting. Weights are
- * normalized to sum to 1, so the final score also lands in [0, 1] and the
- * per-component contributions explain why a product surfaced.
+ * Each signal has its own scale, so every signal is min-max normalized to
+ * [0, 1] before weighting. Weights are normalized to sum to 1, so the final
+ * score also lands in [0, 1] and the per-component contributions explain why a
+ * product surfaced.
  */
 export class HybridRecommender {
   compose(
@@ -38,46 +42,34 @@ export class HybridRecommender {
     weights: HybridWeights = DEFAULT_WEIGHTS,
   ): HybridRecommendation[] {
     const w = normalizeWeights(weights);
-    const maxPopularity = maxValue(signals.popularity);
-    const maxAssociation = maxValue(signals.association);
-    const maxCollaborative = maxValue(signals.collaborative);
+    const maxima = Object.fromEntries(
+      COMPONENTS.map((key) => [key, maxValue(signals[key])]),
+    ) as Record<keyof HybridComponents, number>;
 
-    const candidates = new Set<string>([
-      ...signals.popularity.keys(),
-      ...signals.association.keys(),
-      ...signals.collaborative.keys(),
-    ]);
+    const candidates = new Set<string>();
+    for (const key of COMPONENTS) {
+      for (const productId of signals[key].keys()) {
+        candidates.add(productId);
+      }
+    }
 
     return [...candidates]
       .map((productId) => {
-        const components: HybridComponents = {
-          popularity: normalize(signals.popularity.get(productId), maxPopularity),
-          association: normalize(signals.association.get(productId), maxAssociation),
-          collaborative: normalize(
-            signals.collaborative.get(productId),
-            maxCollaborative,
-          ),
-        };
+        const components = {} as HybridComponents;
+        const contributions = {} as HybridComponents;
+        let score = 0;
 
-        const contributions = {
-          popularity: components.popularity * w.popularity,
-          association: components.association * w.association,
-          collaborative: components.collaborative * w.collaborative,
-        };
-
-        const score =
-          contributions.popularity +
-          contributions.association +
-          contributions.collaborative;
+        for (const key of COMPONENTS) {
+          const value = normalize(signals[key].get(productId), maxima[key]);
+          components[key] = Number(value.toFixed(4));
+          contributions[key] = value * w[key];
+          score += contributions[key];
+        }
 
         return {
           productId,
           score: Number(score.toFixed(4)),
-          components: {
-            popularity: Number(components.popularity.toFixed(4)),
-            association: Number(components.association.toFixed(4)),
-            collaborative: Number(components.collaborative.toFixed(4)),
-          },
+          components,
           reason: buildReason(contributions),
         } satisfies HybridRecommendation;
       })
@@ -94,17 +86,17 @@ export class HybridRecommender {
 }
 
 function normalizeWeights(weights: HybridWeights): HybridWeights {
-  const total =
-    weights.popularity + weights.association + weights.collaborative;
+  const total = COMPONENTS.reduce((sum, key) => sum + (weights[key] ?? 0), 0);
 
   if (total <= 0) {
     return DEFAULT_WEIGHTS;
   }
 
   return {
-    popularity: weights.popularity / total,
-    association: weights.association / total,
-    collaborative: weights.collaborative / total,
+    popularity: (weights.popularity ?? 0) / total,
+    association: (weights.association ?? 0) / total,
+    collaborative: (weights.collaborative ?? 0) / total,
+    trend: (weights.trend ?? 0) / total,
   };
 }
 
@@ -122,17 +114,19 @@ function normalize(value: number | undefined, max: number): number {
 }
 
 function buildReason(contributions: HybridComponents): string {
-  const entries = Object.entries(contributions) as Array<
-    [keyof HybridComponents, number]
-  >;
+  let dominantKey: keyof HybridComponents = "popularity";
+  let dominantValue = -1;
 
-  const dominant = entries.reduce((best, current) =>
-    current[1] > best[1] ? current : best,
-  );
+  for (const key of COMPONENTS) {
+    if (contributions[key] > dominantValue) {
+      dominantValue = contributions[key];
+      dominantKey = key;
+    }
+  }
 
-  if (dominant[1] <= 0) {
+  if (dominantValue <= 0) {
     return "Recomendacion combinada.";
   }
 
-  return `Impulsado principalmente por ${COMPONENT_LABELS[dominant[0]]}.`;
+  return `Impulsado principalmente por ${COMPONENT_LABELS[dominantKey]}.`;
 }

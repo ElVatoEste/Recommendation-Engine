@@ -24,8 +24,10 @@ import {
   type PopularRecommendation,
   type RecommendationEvent,
   type PurchaseCreatedEvent,
+  type TrendStat,
 } from "../../shared/src/index.ts";
 import { ProductStatisticsTracker } from "../../statistics/src/index.ts";
+import { TrendTracker } from "../../trends/src/index.ts";
 
 export class RecommendationEngine {
   private readonly associationRanker = new AssociationRanker();
@@ -36,6 +38,7 @@ export class RecommendationEngine {
   private readonly hybrid = new HybridRecommender();
   private readonly ranker = new PopularProductsRanker();
   private readonly statistics = new ProductStatisticsTracker();
+  private readonly trends = new TrendTracker();
   private totalEvents = 0;
   private initialization?: Promise<void>;
 
@@ -97,6 +100,10 @@ export class RecommendationEngine {
 
   getFeedbackStats(): FeedbackStats[] {
     return this.feedback.getStats();
+  }
+
+  getTrends(limit = 10, windowMs?: number): TrendStat[] {
+    return this.trends.getTrends(windowMs).slice(0, limit);
   }
 
   getCustomerProfile(customerId: string): CustomerProfile | undefined {
@@ -174,8 +181,15 @@ export class RecommendationEngine {
       }
     }
 
+    const trend = new Map<string, number>();
+    for (const [productId, score] of this.trends.getTrendScores()) {
+      if (!owned.has(productId)) {
+        trend.set(productId, score);
+      }
+    }
+
     return this.hybrid.compose(
-      { popularity, association, collaborative },
+      { popularity, association, collaborative, trend },
       limit,
       weights,
     );
@@ -213,6 +227,7 @@ export class RecommendationEngine {
         this.statistics.registerPurchase(event);
         this.coPurchaseGraph.registerPurchase(event);
         this.customers.registerPurchase(event);
+        this.trends.registerPurchase(event);
         return;
       case "RecommendationAccepted":
         this.feedback.registerAccepted(event);
