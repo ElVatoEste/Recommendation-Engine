@@ -100,6 +100,25 @@ async function ingestAndRespond(
 async function main(): Promise<void> {
   await engine.initialize();
 
+  // A default A/B experiment so the endpoints are demoable out of the box:
+  // a balanced hybrid vs a collaborative-heavy blend.
+  engine.defineExperiment({
+    id: "default",
+    variants: [
+      { id: "balanced", allocation: 1 },
+      {
+        id: "collab-heavy",
+        allocation: 1,
+        weights: {
+          popularity: 0.1,
+          association: 0.2,
+          collaborative: 0.6,
+          trend: 0.1,
+        },
+      },
+    ],
+  });
+
   const server = createServer(async (request, response) => {
     const method = request.method ?? "GET";
     const url = new URL(
@@ -163,6 +182,56 @@ async function main(): Promise<void> {
           trends: engine.getTrends(limit, windowMs),
         });
         return;
+      }
+
+      if (method === "GET" && url.pathname === "/experiments") {
+        sendJson(response, 200, { experiments: engine.listExperiments() });
+        return;
+      }
+
+      if (method === "POST" && url.pathname === "/experiments") {
+        const body = await readJsonBody(request);
+        if (typeof body !== "object" || body === null || !("id" in body)) {
+          throw new Error("Body must be an experiment config { id, variants }.");
+        }
+        engine.defineExperiment(body as never);
+        sendJson(response, 201, { defined: (body as { id: string }).id });
+        return;
+      }
+
+      if (method === "GET" && url.pathname.startsWith("/experiments/")) {
+        const segments = url.pathname.split("/").filter(Boolean);
+        const experimentId = decodeURIComponent(segments[1] ?? "");
+        const resource = segments[2];
+
+        if (resource === "report" && segments.length === 3) {
+          const report = engine.getExperimentReport(experimentId);
+          if (!report) {
+            sendJson(response, 404, { error: `Unknown experiment: ${experimentId}` });
+            return;
+          }
+          sendJson(response, 200, report);
+          return;
+        }
+
+        if (resource === "recommendations" && segments.length === 3) {
+          const customer = url.searchParams.get("customer") ?? "";
+          const limit = Number(url.searchParams.get("limit") ?? "10");
+          if (!customer) {
+            throw new Error("Query parameter customer is required.");
+          }
+          const result = engine.getExperimentRecommendations(
+            experimentId,
+            customer,
+            limit,
+          );
+          if (!result) {
+            sendJson(response, 404, { error: `Unknown experiment: ${experimentId}` });
+            return;
+          }
+          sendJson(response, 200, { experimentId, customer, ...result });
+          return;
+        }
       }
 
       if (method === "GET" && url.pathname === "/evaluate") {
@@ -383,6 +452,10 @@ async function main(): Promise<void> {
           "GET /recommendations/hybrid?customer=c-1&limit=5",
           "GET /recommendations/trending?limit=5&windowDays=30",
           "GET /evaluate?k=5",
+          "GET /experiments",
+          "POST /experiments",
+          "GET /experiments/:id/report",
+          "GET /experiments/:id/recommendations?customer=c-1&limit=5",
           "GET /stats/products",
           "GET /graph/co-purchases?productId=bread&limit=5",
           "GET /associations?productId=bread&limit=5",

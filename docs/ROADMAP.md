@@ -46,4 +46,4 @@
 - [x] Persistent event store (PostgreSQL)
 - [x] Streaming ingestion (batch endpoint + SSE stream)
 - [x] Real-time recommendation refresh (live graph viewer)
-- [ ] A/B testing and feedback loops
+- [x] A/B testing and feedback loops (variant assignment + online best-variant selection)

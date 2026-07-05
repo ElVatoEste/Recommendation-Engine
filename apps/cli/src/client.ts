@@ -7,6 +7,8 @@ import type {
   CustomerSimilarity,
   EmbeddingRecommendation,
   EvaluationReport,
+  ExperimentConfig,
+  ExperimentReport,
   FeedbackStats,
   HybridRecommendation,
   ProductSimilarity,
@@ -231,5 +233,28 @@ export class RecommendationApiClient {
       `/recommendations/hybrid?${params.toString()}`,
     );
     return body.recommendations;
+  }
+
+  async experiments(): Promise<ExperimentConfig[]> {
+    const body = await this.request<{ experiments: ExperimentConfig[] }>(
+      "/experiments",
+    );
+    return body.experiments;
+  }
+
+  experimentReport(experimentId: string): Promise<ExperimentReport> {
+    return this.request<ExperimentReport>(
+      `/experiments/${encodeURIComponent(experimentId)}/report`,
+    );
+  }
+
+  experimentRecommendations(
+    experimentId: string,
+    customerId: string,
+    limit: number,
+  ): Promise<{ variantId: string; recommendations: HybridRecommendation[] }> {
+    return this.request(
+      `/experiments/${encodeURIComponent(experimentId)}/recommendations?customer=${encodeURIComponent(customerId)}&limit=${limit}`,
+    );
   }
 }

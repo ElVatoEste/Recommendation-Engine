@@ -4,6 +4,7 @@ import {
 } from "../../customers/src/index.ts";
 import { ProductEmbeddingIndex } from "../../embeddings/src/index.ts";
 import { Evaluator } from "../../evaluation/src/index.ts";
+import { ExperimentRegistry } from "../../experiments/src/index.ts";
 import { RecommendationFeedbackTracker } from "../../feedback/src/index.ts";
 import { CoPurchaseGraphTracker } from "../../graph/src/index.ts";
 import { HybridRecommender } from "../../hybrid/src/index.ts";
@@ -21,6 +22,9 @@ import {
   type EmbeddingRecommendation,
   type EngineSnapshot,
   type EvaluationReport,
+  type ExperimentConfig,
+  type ExperimentReport,
+  type ExperimentVariant,
   type ProductSimilarity,
   type EventStore,
   type FeedbackStats,
@@ -40,6 +44,7 @@ export class RecommendationEngine {
   private readonly collaborative = new CollaborativeRecommender();
   private readonly customers = new CustomerProfileTracker();
   private readonly evaluator = new Evaluator();
+  private readonly experiments = new ExperimentRegistry();
   private readonly feedback = new RecommendationFeedbackTracker();
   private readonly hybrid = new HybridRecommender();
   private readonly ranker = new PopularProductsRanker();
@@ -123,6 +128,46 @@ export class RecommendationEngine {
 
   getTrends(limit = 10, windowMs?: number): TrendStat[] {
     return this.trends.getTrends(windowMs).slice(0, limit);
+  }
+
+  defineExperiment(config: ExperimentConfig): void {
+    this.experiments.define(config);
+  }
+
+  listExperiments(): ExperimentConfig[] {
+    return this.experiments.list();
+  }
+
+  getExperimentReport(experimentId: string): ExperimentReport | undefined {
+    return this.experiments.report(experimentId);
+  }
+
+  getExperimentAssignment(
+    experimentId: string,
+    customerId: string,
+  ): ExperimentVariant | undefined {
+    return this.experiments.assign(experimentId, customerId);
+  }
+
+  /** Serves recommendations under the customer's assigned experiment variant. */
+  getExperimentRecommendations(
+    experimentId: string,
+    customerId: string,
+    limit = 10,
+  ): { variantId: string; recommendations: HybridRecommendation[] } | undefined {
+    const variant = this.experiments.assign(experimentId, customerId);
+    if (!variant) {
+      return undefined;
+    }
+
+    return {
+      variantId: variant.id,
+      recommendations: this.getHybridRecommendations(
+        customerId,
+        limit,
+        variant.weights,
+      ),
+    };
   }
 
   getCustomerProfile(customerId: string): CustomerProfile | undefined {
@@ -283,12 +328,26 @@ export class RecommendationEngine {
         return;
       case "RecommendationAccepted":
         this.feedback.registerAccepted(event);
+        this.recordExperimentOutcome(event, true);
         return;
       case "RecommendationIgnored":
         this.feedback.registerIgnored(event);
+        this.recordExperimentOutcome(event, false);
         return;
       default:
         return;
+    }
+  }
+
+  private recordExperimentOutcome(
+    event: RecommendationEvent,
+    accepted: boolean,
+  ): void {
+    const experimentId = event.metadata?.experimentId;
+    const variantId = event.metadata?.variantId;
+
+    if (experimentId && variantId) {
+      this.experiments.recordOutcome(experimentId, variantId, accepted);
     }
   }
 }

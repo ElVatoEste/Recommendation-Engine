@@ -10,6 +10,7 @@ import type {
   CustomerSimilarity,
   EmbeddingRecommendation,
   EvaluationReport,
+  ExperimentReport,
   FeedbackStats,
   HybridRecommendation,
   ProductSimilarity,
@@ -208,6 +209,28 @@ export function renderEmbeddingRecommendations(
     t.push([pc.bold(item.productId), pc.yellow(item.score.toFixed(4)), pc.dim(item.reason)]);
   }
   console.log(t.toString());
+}
+
+export function renderExperimentReport(report: ExperimentReport): void {
+  const t = table(["Variant", "Impressions", "Acceptances", "Acceptance rate"]);
+  for (const variant of report.variants) {
+    const isBest = variant.variantId === report.bestVariant;
+    const name = isBest
+      ? pc.green(pc.bold(`${variant.variantId} ★`))
+      : pc.bold(variant.variantId);
+    t.push([
+      name,
+      String(variant.impressions),
+      pc.green(String(variant.acceptances)),
+      pc.yellow(variant.acceptanceRate.toFixed(4)),
+    ]);
+  }
+  console.log(t.toString());
+  if (report.bestVariant) {
+    console.log(pc.dim(`\n  Best-converting variant: ${pc.green(report.bestVariant)}`));
+  } else {
+    console.log(pc.dim("\n  No outcomes recorded yet."));
+  }
 }
 
 export function renderEvaluation(report: EvaluationReport): void {

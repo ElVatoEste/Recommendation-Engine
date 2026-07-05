@@ -7,7 +7,7 @@
   <p>Event-driven ingestion, product statistics, explainable ranking, and a roadmap that grows from simple signals into graph, collaborative, and hybrid recommendation strategies.</p>
 
   <p>
-    <img src="https://img.shields.io/badge/status-phase%201%20foundation-2563eb" alt="Status: Phase 1 foundation">
+    <img src="https://img.shields.io/badge/status-phases%201--5%20implemented-2563eb" alt="Status: Phases 1-5 implemented">
     <img src="https://img.shields.io/badge/runtime-Bun-f472b6" alt="Runtime: Bun">
     <img src="https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white" alt="Language: TypeScript">
     <img src="https://img.shields.io/badge/architecture-event--driven-10b981" alt="Architecture: event-driven">
@@ -27,18 +27,20 @@ The goal is not only to produce recommendations, but to understand exactly why t
 
 ## What works today
 
-The repository already includes a working Phase 1 foundation:
+The repository implements the full roadmap (Phases 1-5) from first principles:
 
-- `PurchaseCreated` event ingestion
-- generic event ingestion for supported event types
-- in-memory event store
-- PostgreSQL-backed event store through `DATABASE_URL`
-- product-level statistics
-- popular products ranking
-- co-purchase graph
-- simple association rules
-- minimal HTTP API for local testing
-- local playground with sample data
+- event ingestion (single, batch, and a Server-Sent Events stream)
+- in-memory and PostgreSQL-backed event stores
+- product statistics and popular-products ranking
+- co-purchase graph with an interactive, live-updating visualizer
+- association rules reweighted by a recommendation feedback loop
+- customer profiles and user-based collaborative filtering
+- co-occurrence product embeddings and taste-profile scoring
+- trend/momentum signals
+- a weighted, explainable hybrid ranking that blends every signal
+- offline leave-one-out benchmarking across strategies
+- A/B experiments with deterministic assignment and best-variant selection
+- an HTTP API, a CLI client, and a local playground
 
 ## Recommendation evolution
 
@@ -97,6 +99,9 @@ bun run cli trending                  # products with recent momentum
 bun run cli similar-products bread    # embedding neighbors (shared context)
 bun run cli embedding c-1             # embedding-based recommendations
 bun run cli evaluate                  # leave-one-out benchmark of strategies
+bun run cli experiments               # list A/B experiments
+bun run cli experiment default c-1    # variant assignment + recommendations
+bun run cli experiment-report default # conversion + best-converting variant
 bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
@@ -125,6 +130,9 @@ Available routes:
 - `GET /recommendations/hybrid?customer=c-1&limit=5` (optional `wPop`, `wAssoc`, `wCollab`, `wTrend` weights)
 - `GET /recommendations/trending?limit=5&windowDays=30`
 - `GET /evaluate?k=5` — leave-one-out benchmark across strategies
+- `GET /experiments` · `POST /experiments`
+- `GET /experiments/:id/report` — A/B conversion + best variant
+- `GET /experiments/:id/recommendations?customer=c-1&limit=5`
 - `GET /stats/products`
 - `GET /graph/co-purchases?productId=bread&limit=5`
 - `GET /associations?productId=bread&limit=5`
@@ -224,6 +232,7 @@ packages/
   customers/            customer profiles + collaborative filtering
   embeddings/           co-occurrence product embeddings
   evaluation/           leave-one-out strategy benchmark
+  experiments/          A/B testing + variant assignment
   feedback/             recommendation feedback tracker
   graph/                co-purchase graph
   hybrid/               weighted multi-signal ranking

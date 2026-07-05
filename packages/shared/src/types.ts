@@ -217,6 +217,30 @@ export interface CoPurchaseGraph {
   edges: GraphEdge[];
 }
 
+export interface ExperimentVariant {
+  id: string;
+  allocation: number;
+  weights?: HybridWeights;
+}
+
+export interface ExperimentConfig {
+  id: string;
+  variants: ExperimentVariant[];
+}
+
+export interface VariantReport {
+  variantId: string;
+  impressions: number;
+  acceptances: number;
+  acceptanceRate: number;
+}
+
+export interface ExperimentReport {
+  experimentId: string;
+  variants: VariantReport[];
+  bestVariant?: string;
+}
+
 export interface EvaluationStrategyResult {
   strategy: string;
   hitRate: number;

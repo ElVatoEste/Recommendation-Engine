@@ -16,6 +16,7 @@ import {
   renderEmbeddingRecommendations,
   renderEvaluation,
   renderEvents,
+  renderExperimentReport,
   renderFeedback,
   renderGraph,
   renderHybrid,
@@ -172,6 +173,52 @@ program
     if (!items) return;
     heading(`Embedding recommendations: ${customer}`);
     renderEmbeddingRecommendations(items);
+  });
+
+program
+  .command("experiments")
+  .description("list A/B experiments")
+  .action(async () => {
+    const items = await withSpinner("Fetching experiments", () =>
+      client().experiments(),
+    );
+    if (!items) return;
+    heading("Experiments");
+    if (items.length === 0) {
+      console.log(pc.dim("  (none defined)"));
+      return;
+    }
+    for (const experiment of items) {
+      const variants = experiment.variants.map((v) => v.id).join(", ");
+      console.log(`  ${pc.bold(experiment.id)}  ${pc.dim(`[${variants}]`)}`);
+    }
+  });
+
+program
+  .command("experiment <id> <customer>")
+  .description("show a customer's variant assignment and recommendations")
+  .option("-l, --limit <n>", "number of recommendations", "10")
+  .action(async (id, customer, options) => {
+    const result = await withSpinner(
+      `Assigning ${customer} in ${id}`,
+      () => client().experimentRecommendations(id, customer, Number(options.limit)),
+    );
+    if (!result) return;
+    heading(`Experiment ${id}: ${customer}`);
+    console.log(`  ${pc.dim("assigned variant")} ${pc.green(pc.bold(result.variantId))}`);
+    renderHybrid(result.recommendations);
+  });
+
+program
+  .command("experiment-report <id>")
+  .description("A/B conversion report with the best-converting variant")
+  .action(async (id) => {
+    const report = await withSpinner(`Fetching report for ${id}`, () =>
+      client().experimentReport(id),
+    );
+    if (!report) return;
+    heading(`Experiment report: ${id}`);
+    renderExperimentReport(report);
   });
 
 program
