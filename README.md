@@ -104,7 +104,8 @@ bun run cli health
 ```
 
 Open `http://localhost:3000/graph/view` in a browser for an interactive,
-force-directed view of the co-purchase graph.
+force-directed view of the co-purchase graph. It subscribes to
+`/events/stream` and re-renders in real time as new purchases arrive.
 
 Target a non-default API with `--api <url>` or the `API_URL` environment variable.
 
@@ -139,6 +140,8 @@ Available routes:
 - `GET /graph/view` — interactive graph visualizer (open in a browser)
 - `POST /events`
 - `POST /events/purchase`
+- `POST /events/batch` — ingest an array of events
+- `GET /events/stream` — Server-Sent Events stream of ingested events + live snapshot
 
 Association ranking is reweighted by recommendation feedback: `RecommendationAccepted`
 and `RecommendationIgnored` events raise or lower a target's `feedbackFactor`, which

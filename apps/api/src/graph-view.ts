@@ -42,17 +42,21 @@ export const GRAPH_VIEW_HTML = `<!doctype html>
 <header>
   <h1>Co-purchase graph</h1>
   <span class="meta" id="meta">loading…</span>
+  <span class="meta" id="live"></span>
 </header>
 <svg id="canvas"></svg>
 <div class="hint">drag nodes • hover to highlight • thickness = co-purchase weight • size = purchases</div>
 <script>
 const SVGNS = "http://www.w3.org/2000/svg";
 
-async function main() {
-  const res = await fetch("/graph");
-  const graph = await res.json();
+let activeDrag = null;
+let activeRender = () => {};
+
+function draw(graph) {
   const svg = document.getElementById("canvas");
   const meta = document.getElementById("meta");
+  svg.innerHTML = "";
+  document.querySelectorAll(".empty").forEach((el) => el.remove());
 
   if (!graph.nodes || graph.nodes.length === 0) {
     meta.textContent = "no data";
@@ -150,6 +154,7 @@ async function main() {
     }
   }
   render();
+  activeRender = render;
 
   function highlight(id) {
     const near = neighbors.get(id) ?? new Set();
@@ -161,17 +166,42 @@ async function main() {
     }
   }
 
-  let drag = null;
   for (const item of nodeEls) {
-    item.g.addEventListener("mouseenter", () => highlight(item.n.id));
-    item.g.addEventListener("mouseleave", () => { if (!drag) highlight(null); });
-    item.g.addEventListener("mousedown", (ev) => { drag = item; highlight(item.n.id); ev.preventDefault(); });
+    item.g.addEventListener("mouseenter", () => { if (!activeDrag) highlight(item.n.id); });
+    item.g.addEventListener("mouseleave", () => { if (!activeDrag) highlight(null); });
+    item.g.addEventListener("mousedown", (ev) => { activeDrag = item.n; highlight(item.n.id); ev.preventDefault(); });
   }
-  window.addEventListener("mousemove", (ev) => {
-    if (!drag) return;
-    drag.n.x = ev.clientX; drag.n.y = ev.clientY; render();
-  });
-  window.addEventListener("mouseup", () => { drag = null; highlight(null); });
+}
+
+// Drag handling lives at window scope so redraws (live updates) don't stack listeners.
+window.addEventListener("mousemove", (ev) => {
+  if (!activeDrag) return;
+  activeDrag.x = ev.clientX;
+  activeDrag.y = ev.clientY;
+  activeRender();
+});
+window.addEventListener("mouseup", () => { activeDrag = null; });
+
+async function load() {
+  const res = await fetch("/graph");
+  draw(await res.json());
+}
+
+let reloadTimer = null;
+async function main() {
+  await load();
+  const live = document.getElementById("live");
+  try {
+    const source = new EventSource("/events/stream");
+    source.onopen = () => { live.textContent = "● live"; live.style.color = "#4ade80"; };
+    source.onmessage = () => {
+      clearTimeout(reloadTimer);
+      reloadTimer = setTimeout(load, 500);
+    };
+    source.onerror = () => { live.textContent = "○ reconnecting"; live.style.color = "#64748b"; };
+  } catch (err) {
+    /* EventSource unsupported; static view still works. */
+  }
 }
 
 main().catch((err) => {

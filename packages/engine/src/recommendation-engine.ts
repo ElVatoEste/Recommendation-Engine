@@ -45,10 +45,19 @@ export class RecommendationEngine {
   private readonly ranker = new PopularProductsRanker();
   private readonly statistics = new ProductStatisticsTracker();
   private readonly trends = new TrendTracker();
+  private readonly listeners = new Set<(event: RecommendationEvent) => void>();
   private totalEvents = 0;
   private initialization?: Promise<void>;
 
   constructor(private readonly eventStore: EventStore) {}
+
+  /** Subscribe to ingested events (streaming). Returns an unsubscribe function. */
+  subscribe(listener: (event: RecommendationEvent) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
 
   async initialize(): Promise<void> {
     // Cache the in-flight promise so concurrent callers replay events once.
@@ -75,6 +84,10 @@ export class RecommendationEngine {
     await this.eventStore.append(event);
     this.applyEvent(event);
     this.totalEvents += 1;
+
+    for (const listener of this.listeners) {
+      listener(event);
+    }
   }
 
   async ingestPurchase(event: PurchaseCreatedEvent): Promise<void> {

@@ -59,6 +59,13 @@ Recommendation Engine
 - Isolated modules for future pluggable strategies
 - Incremental evolution from statistics to hybrid recommendation
 
+## Streaming
+
+`ingestEvent` fans out to subscribers, which the HTTP API exposes as a
+Server-Sent Events stream (`GET /events/stream`). Batch ingestion
+(`POST /events/batch`) and the live-updating graph viewer build on the same
+subscription, so recommendations and the graph refresh in real time.
+
 ## Next architectural step
 
 The next layer is precomputed persistence for graph-derived features plus

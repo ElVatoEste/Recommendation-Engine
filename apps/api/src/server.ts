@@ -276,6 +276,54 @@ async function main(): Promise<void> {
         }
       }
 
+      if (method === "GET" && url.pathname === "/events/stream") {
+        response.writeHead(200, {
+          "content-type": "text/event-stream; charset=utf-8",
+          "cache-control": "no-cache",
+          connection: "keep-alive",
+        });
+        response.write(": connected\n\n");
+
+        const unsubscribe = engine.subscribe((event) => {
+          response.write(
+            `data: ${JSON.stringify({ event, snapshot: engine.getSnapshot() })}\n\n`,
+          );
+        });
+
+        const heartbeat = setInterval(() => response.write(": ping\n\n"), 15000);
+
+        request.on("close", () => {
+          clearInterval(heartbeat);
+          unsubscribe();
+        });
+        return;
+      }
+
+      if (method === "POST" && url.pathname === "/events/batch") {
+        const body = await readJsonBody(request);
+        const rawEvents =
+          typeof body === "object" && body !== null && "events" in body
+            ? (body as { events: unknown }).events
+            : body;
+
+        if (!Array.isArray(rawEvents)) {
+          throw new Error("Body must be an array or { events: [...] }.");
+        }
+
+        let accepted = 0;
+        for (const raw of rawEvents) {
+          const event = validateRecommendationEvent(withEventDefaults(raw));
+          await engine.ingestEvent(event);
+          accepted += 1;
+        }
+
+        sendJson(response, 201, {
+          accepted,
+          snapshot: engine.getSnapshot(),
+        });
+        return;
+      }
+
       if (method === "GET" && url.pathname === "/events") {
         const limit = Number(url.searchParams.get("limit") ?? "50");
         const all = await eventStore.getAll();
@@ -340,6 +388,8 @@ async function main(): Promise<void> {
           "GET /associations?productId=bread&limit=5",
           "GET /feedback/stats",
           "GET /events?limit=50",
+          "GET /events/stream (server-sent events)",
+          "POST /events/batch",
           "GET /graph",
           "GET /graph/view",
           "GET /customers",
