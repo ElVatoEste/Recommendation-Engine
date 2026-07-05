@@ -1,0 +1,48 @@
+# Architecture
+
+Recommendation Engine is structured as a modular monorepo where ingestion, storage,
+statistics, ranking, and future learning layers can evolve independently.
+
+## Current runtime
+
+```text
+HTTP API
+  |
+  v
+Recommendation Engine
+  |
+  +--> Event Store (memory or PostgreSQL)
+  |
+  +--> Product Statistics Tracker
+  |
+  +--> Co-Purchase Graph Tracker
+  |
+  +--> Popular Products Ranker
+  |
+  +--> Association Ranker
+```
+
+## Current packages
+
+- `packages/shared`: domain types and validation helpers
+- `packages/storage`: event store abstraction and in-memory implementation
+- `packages/graph`: co-purchase graph construction
+- `packages/statistics`: incremental product statistics
+- `packages/ranking`: recommendation ranking strategies
+- `packages/engine`: orchestration layer over ingestion and queries
+- `apps/api`: local HTTP API for manual testing
+- `apps/playground`: sample dataset runner for quick iteration
+
+## Design principles
+
+- Event-driven ingestion first
+- Simple algorithms before heavy ML
+- Explainability over opaque scoring
+- Isolated modules for future pluggable strategies
+- Incremental evolution from statistics to hybrid recommendation
+
+## Next architectural step
+
+The next layer is precomputed persistence for graph-derived features plus
+customer-level behavior models, which unlock similarity, collaborative filtering,
+and richer explainable ranking.

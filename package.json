@@ -1,0 +1,48 @@
+{
+  "name": "recommendation-engine",
+  "version": "0.1.0",
+  "description": "A modular recommendation engine built from first principles with event-driven ingestion, product statistics, and explainable ranking layers.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ElVatoEste/Recommendation-Engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ElVatoEste/Recommendation-Engine/issues"
+  },
+  "homepage": "https://github.com/ElVatoEste/Recommendation-Engine#readme",
+  "keywords": [
+    "recommendation-engine",
+    "recommender-system",
+    "typescript",
+    "bun",
+    "event-driven",
+    "ranking",
+    "graph",
+    "machine-learning"
+  ],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "bun run ./apps/api/src/server.ts",
+    "playground": "bun run ./apps/playground/src/demo.ts",
+    "check": "tsc --noEmit",
+    "test": "bun test",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "stack:up": "docker compose --profile api up -d --build",
+    "stack:down": "docker compose --profile api down"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "pg": "^8.22.0"
+  }
+}
