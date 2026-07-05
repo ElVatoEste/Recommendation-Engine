@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "dev:api": "bun run ./apps/api/src/server.ts",
+    "cli": "bun run ./apps/cli/src/index.ts",
     "playground": "bun run ./apps/playground/src/demo.ts",
     "check": "tsc --noEmit",
     "test": "bun test",
@@ -43,6 +44,11 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "pg": "^8.22.0"
+    "@clack/prompts": "^1.7.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^15.0.0",
+    "ora": "^9.4.1",
+    "pg": "^8.22.0",
+    "picocolors": "^1.1.1"
   }
 }

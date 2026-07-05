@@ -34,6 +34,7 @@ Recommendation Engine
 - `packages/feedback`: recommendation feedback tracking and scoring
 - `packages/engine`: orchestration layer over ingestion and queries
 - `apps/api`: local HTTP API for manual testing
+- `apps/cli`: HTTP client CLI (tables, colors, interactive purchase, dataset seeding)
 - `apps/playground`: sample dataset runner for quick iteration
 
 ## Design principles

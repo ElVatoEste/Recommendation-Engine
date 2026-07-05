@@ -76,6 +76,26 @@ Run the sample playground:
 bun run playground
 ```
 
+## CLI
+
+`apps/cli` is an HTTP client for the API with tables, colors, and an interactive
+purchase flow. Start the API in one terminal (`bun run dev:api`), then:
+
+```bash
+bun run cli seed                      # populate a sample dataset
+bun run cli popular --limit 5
+bun run cli associations bread        # feedback-adjusted recommendations
+bun run cli co-purchases bread
+bun run cli stats
+bun run cli feedback
+bun run cli events --limit 20
+bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
+bun run cli purchase                  # interactive prompts
+bun run cli health
+```
+
+Target a non-default API with `--api <url>` or the `API_URL` environment variable.
+
 Type-check and test the workspace:
 
 ```bash
@@ -171,6 +191,7 @@ Optional: `DATABASE_POOL_MAX` tunes the connection pool size (default `10`).
 ```text
 apps/
   api/                  local HTTP API
+  cli/                  HTTP client CLI
   playground/           sample dataset runner
 packages/
   engine/               orchestration layer
