@@ -117,7 +117,17 @@ export interface AssociationRecommendation {
   support: number;
   confidence: number;
   lift: number;
+  feedbackFactor: number;
+  adjustedScore: number;
   reason: string;
+}
+
+export interface FeedbackStats {
+  targetProductId: string;
+  accepted: number;
+  ignored: number;
+  acceptanceRate: number;
+  factor: number;
 }
 
 export interface EngineSnapshot {

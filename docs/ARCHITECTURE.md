@@ -19,7 +19,9 @@ Recommendation Engine
   |
   +--> Popular Products Ranker
   |
-  +--> Association Ranker
+  +--> Association Ranker (reweighted by feedback)
+  |
+  +--> Recommendation Feedback Tracker
 ```
 
 ## Current packages
@@ -29,6 +31,7 @@ Recommendation Engine
 - `packages/graph`: co-purchase graph construction
 - `packages/statistics`: incremental product statistics
 - `packages/ranking`: recommendation ranking strategies
+- `packages/feedback`: recommendation feedback tracking and scoring
 - `packages/engine`: orchestration layer over ingestion and queries
 - `apps/api`: local HTTP API for manual testing
 - `apps/playground`: sample dataset runner for quick iteration

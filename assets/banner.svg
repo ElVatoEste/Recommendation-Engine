@@ -1,55 +1,80 @@
 <svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1600" height="520" rx="28" fill="#08111D"/>
-  <rect x="24" y="24" width="1552" height="472" rx="24" fill="url(#bg)"/>
-  <circle cx="1288" cy="118" r="182" fill="url(#glowA)" opacity="0.38"/>
-  <circle cx="1200" cy="368" r="228" fill="url(#glowB)" opacity="0.26"/>
-  <circle cx="1384" cy="260" r="88" stroke="#7DD3FC" stroke-opacity="0.28" stroke-width="2"/>
-  <circle cx="1384" cy="260" r="44" fill="#38BDF8" fill-opacity="0.24"/>
-  <path d="M1160 160L1280 220L1160 280L1040 220L1160 160Z" fill="#0EA5E9" fill-opacity="0.12" stroke="#38BDF8" stroke-opacity="0.35" stroke-width="2"/>
-  <path d="M1040 220V328L1160 388V280L1040 220Z" fill="#22C55E" fill-opacity="0.1" stroke="#4ADE80" stroke-opacity="0.28" stroke-width="2"/>
-  <path d="M1280 220V328L1160 388V280L1280 220Z" fill="#6366F1" fill-opacity="0.1" stroke="#818CF8" stroke-opacity="0.28" stroke-width="2"/>
-  <path d="M1110 122C1145 102 1186 91 1228 91C1345 91 1440 186 1440 303C1440 348 1426 391 1400 427" stroke="#67E8F9" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12" opacity="0.7"/>
-  <path d="M1070 332C1116 372 1176 396 1242 396C1303 396 1359 376 1403 342" stroke="#A78BFA" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12" opacity="0.6"/>
-  <circle cx="1110" cy="122" r="8" fill="#67E8F9"/>
-  <circle cx="1400" cy="427" r="8" fill="#67E8F9"/>
-  <circle cx="1070" cy="332" r="8" fill="#A78BFA"/>
-  <circle cx="1403" cy="342" r="8" fill="#A78BFA"/>
-  <text x="96" y="176" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="700" letter-spacing="-1.5">
-    Recommendation Engine
-  </text>
-  <text x="96" y="238" fill="#B6C2CF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="500">
-    Modular recommendation system from first principles
-  </text>
-  <text x="96" y="294" fill="#8CA3B8" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400">
-    Events -> Statistics -> Graph -> Collaborative Filtering -> Hybrid Ranking
-  </text>
-  <g opacity="0.95">
-    <rect x="96" y="352" width="194" height="48" rx="24" fill="#0F172A" stroke="#1D4ED8" stroke-opacity="0.35"/>
-    <text x="132" y="383" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="600">
-      Phase 1 foundation
-    </text>
-    <rect x="306" y="352" width="154" height="48" rx="24" fill="#0F172A" stroke="#0EA5E9" stroke-opacity="0.35"/>
-    <text x="356" y="383" fill="#7DD3FC" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="600">
-      Bun + TS
-    </text>
-    <rect x="476" y="352" width="212" height="48" rx="24" fill="#0F172A" stroke="#22C55E" stroke-opacity="0.35"/>
-    <text x="523" y="383" fill="#86EFAC" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="600">
-      Event-driven core
-    </text>
-  </g>
   <defs>
-    <linearGradient id="bg" x1="110" y1="42" x2="1485" y2="490" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0B1524"/>
-      <stop offset="0.55" stop-color="#0E1B2E"/>
-      <stop offset="1" stop-color="#0A1320"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="520" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220"/>
+      <stop offset="0.5" stop-color="#0D1728"/>
+      <stop offset="1" stop-color="#0A111E"/>
     </linearGradient>
-    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1288 118) rotate(90) scale(182)">
-      <stop stop-color="#0EA5E9"/>
-      <stop offset="1" stop-color="#0EA5E9" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1200 260) scale(320)">
+      <stop stop-color="#1E3A8A" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#1E3A8A" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1200 368) rotate(90) scale(228)">
-      <stop stop-color="#8B5CF6"/>
-      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
-    </radialGradient>
+    <linearGradient id="title" x1="100" y1="150" x2="820" y2="210" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FAFC"/>
+      <stop offset="1" stop-color="#93C5FD"/>
+    </linearGradient>
   </defs>
+
+  <rect width="1600" height="520" rx="28" fill="#080E19"/>
+  <rect x="20" y="20" width="1560" height="480" rx="24" fill="url(#bg)" stroke="#1E293B" stroke-width="1.5"/>
+  <circle cx="1200" cy="260" r="320" fill="url(#glow)"/>
+
+  <!-- Left: identity -->
+  <text x="100" y="196" fill="url(#title)" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2">Recommendation Engine</text>
+  <text x="102" y="246" fill="#AEBED0" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="27" font-weight="500">Modular recommender, built from first principles.</text>
+  <text x="102" y="298" fill="#6B8199" font-family="Consolas, Menlo, monospace" font-size="20" font-weight="500" letter-spacing="0.5">Events &#8594; Statistics &#8594; Graph &#8594; Collaborative &#8594; Hybrid</text>
+
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="600">
+    <rect x="102" y="344" width="176" height="46" rx="23" fill="#0E1A2E" stroke="#3B82F6" stroke-opacity="0.4"/>
+    <text x="190" y="373" fill="#93C5FD" text-anchor="middle">Phase 1 &#183; 2</text>
+    <rect x="292" y="344" width="150" height="46" rx="23" fill="#0E1A2E" stroke="#22D3EE" stroke-opacity="0.4"/>
+    <text x="367" y="373" fill="#7DD3FC" text-anchor="middle">Bun + TS</text>
+    <rect x="456" y="344" width="196" height="46" rx="23" fill="#0E1A2E" stroke="#34D399" stroke-opacity="0.4"/>
+    <text x="554" y="373" fill="#6EE7B7" text-anchor="middle">Explainable</text>
+  </g>
+
+  <!-- Right: the co-purchase graph the engine actually builds -->
+  <g stroke-linecap="round">
+    <!-- edges (thickness ~ co-purchase weight); bread -> milk is the reinforced recommendation -->
+    <line x1="1200" y1="260" x2="1040" y2="128" stroke="#38BDF8" stroke-width="9" opacity="0.9"/>
+    <line x1="1200" y1="260" x2="1424" y2="150" stroke="#64748B" stroke-width="5" opacity="0.7"/>
+    <line x1="1200" y1="260" x2="1444" y2="372" stroke="#64748B" stroke-width="4" opacity="0.6"/>
+    <line x1="1200" y1="260" x2="1084" y2="404" stroke="#64748B" stroke-width="3.5" opacity="0.55"/>
+  </g>
+
+  <!-- edge weight labels -->
+  <g font-family="Consolas, Menlo, monospace" font-size="18" font-weight="600">
+    <text x="1104" y="188" fill="#7DD3FC" text-anchor="middle">845</text>
+    <text x="1322" y="196" fill="#94A3B8" text-anchor="middle">302</text>
+    <text x="1338" y="322" fill="#94A3B8" text-anchor="middle">217</text>
+    <text x="1128" y="344" fill="#94A3B8" text-anchor="middle">190</text>
+  </g>
+
+  <!-- nodes -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">
+    <!-- satellites -->
+    <circle cx="1040" cy="128" r="36" fill="#0B1A2B" stroke="#38BDF8" stroke-width="2.5"/>
+    <text x="1040" y="134" fill="#E0F2FE" font-size="19" text-anchor="middle">milk</text>
+
+    <circle cx="1424" cy="150" r="34" fill="#101826" stroke="#475569" stroke-width="2"/>
+    <text x="1424" y="156" fill="#CBD5E1" font-size="18" text-anchor="middle">butter</text>
+
+    <circle cx="1444" cy="372" r="34" fill="#101826" stroke="#475569" stroke-width="2"/>
+    <text x="1444" y="378" fill="#CBD5E1" font-size="18" text-anchor="middle">cheese</text>
+
+    <circle cx="1084" cy="404" r="32" fill="#101826" stroke="#475569" stroke-width="2"/>
+    <text x="1084" y="410" fill="#CBD5E1" font-size="18" text-anchor="middle">ham</text>
+
+    <!-- center / source product -->
+    <circle cx="1200" cy="260" r="52" fill="#0A2540" stroke="#60A5FA" stroke-width="3"/>
+    <circle cx="1200" cy="260" r="63" fill="none" stroke="#60A5FA" stroke-opacity="0.25" stroke-width="1.5"/>
+    <text x="1200" y="267" fill="#F8FAFC" font-size="23" font-weight="700" text-anchor="middle">bread</text>
+  </g>
+
+  <!-- recommendation badge on the reinforced edge -->
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <rect x="1058" y="214" width="150" height="34" rx="17" fill="#0E1A2E" stroke="#38BDF8" stroke-opacity="0.5"/>
+    <circle cx="1080" cy="231" r="5" fill="#38BDF8"/>
+    <text x="1096" y="237" fill="#7DD3FC" font-size="16" font-weight="600">recommended</text>
+  </g>
 </svg>

@@ -1,3 +1,4 @@
+import { RecommendationFeedbackTracker } from "../../feedback/src/index.ts";
 import { CoPurchaseGraphTracker } from "../../graph/src/index.ts";
 import {
   AssociationRanker,
@@ -8,6 +9,7 @@ import {
   type CoPurchaseEdge,
   type EngineSnapshot,
   type EventStore,
+  type FeedbackStats,
   type PopularRecommendation,
   type RecommendationEvent,
   type PurchaseCreatedEvent,
@@ -17,6 +19,7 @@ import { ProductStatisticsTracker } from "../../statistics/src/index.ts";
 export class RecommendationEngine {
   private readonly associationRanker = new AssociationRanker();
   private readonly coPurchaseGraph = new CoPurchaseGraphTracker();
+  private readonly feedback = new RecommendationFeedbackTracker();
   private readonly ranker = new PopularProductsRanker();
   private readonly statistics = new ProductStatisticsTracker();
   private totalEvents = 0;
@@ -73,7 +76,13 @@ export class RecommendationEngine {
       this.statistics.getAllProductStats(),
       this.statistics.getTotalPurchases(),
       limit,
+      (targetProductId, sourceProductId) =>
+        this.feedback.getFactor(targetProductId, sourceProductId),
     );
+  }
+
+  getFeedbackStats(): FeedbackStats[] {
+    return this.feedback.getStats();
   }
 
   getSnapshot(): EngineSnapshot {
@@ -92,11 +101,19 @@ export class RecommendationEngine {
   }
 
   private applyEvent(event: RecommendationEvent): void {
-    if (event.type !== "PurchaseCreated") {
-      return;
+    switch (event.type) {
+      case "PurchaseCreated":
+        this.statistics.registerPurchase(event);
+        this.coPurchaseGraph.registerPurchase(event);
+        return;
+      case "RecommendationAccepted":
+        this.feedback.registerAccepted(event);
+        return;
+      case "RecommendationIgnored":
+        this.feedback.registerIgnored(event);
+        return;
+      default:
+        return;
     }
-
-    this.statistics.registerPurchase(event);
-    this.coPurchaseGraph.registerPurchase(event);
   }
 }

@@ -4,6 +4,15 @@ import type {
   ProductStats,
 } from "../../shared/src/index.ts";
 
+/**
+ * Returns a feedback multiplier (centered at 1.0) for a source -> target
+ * recommendation. Defaults to neutral when no feedback provider is supplied.
+ */
+export type FeedbackFactorProvider = (
+  targetProductId: string,
+  sourceProductId: string,
+) => number;
+
 export class AssociationRanker {
   rank(
     sourceProductId: string,
@@ -11,6 +20,7 @@ export class AssociationRanker {
     productStats: ProductStats[],
     totalPurchases: number,
     limit = 10,
+    feedbackFactor: FeedbackFactorProvider = () => 1,
   ): AssociationRecommendation[] {
     const statsByProduct = new Map(
       productStats.map((stats) => [stats.productId, stats]),
@@ -33,6 +43,8 @@ export class AssociationRanker {
         const confidence = edge.coPurchaseCount / sourceStats.purchaseCount;
         const targetProbability = targetStats.purchaseCount / totalPurchases;
         const lift = targetProbability === 0 ? 0 : confidence / targetProbability;
+        const factor = feedbackFactor(edge.relatedProductId, sourceProductId);
+        const adjustedScore = lift * factor;
 
         return {
           sourceProductId,
@@ -41,15 +53,17 @@ export class AssociationRanker {
           support: Number(support.toFixed(4)),
           confidence: Number(confidence.toFixed(4)),
           lift: Number(lift.toFixed(4)),
-          reason: `Clientes que compran ${sourceProductId} tambien compran ${edge.relatedProductId}.`,
+          feedbackFactor: Number(factor.toFixed(4)),
+          adjustedScore: Number(adjustedScore.toFixed(4)),
+          reason: buildReason(sourceProductId, edge.relatedProductId, factor),
         } satisfies AssociationRecommendation;
       })
       .filter((recommendation): recommendation is AssociationRecommendation =>
         recommendation !== null,
       )
       .sort((left, right) => {
-        if (right.lift !== left.lift) {
-          return right.lift - left.lift;
+        if (right.adjustedScore !== left.adjustedScore) {
+          return right.adjustedScore - left.adjustedScore;
         }
 
         if (right.confidence !== left.confidence) {
@@ -64,4 +78,22 @@ export class AssociationRanker {
       })
       .slice(0, limit);
   }
+}
+
+function buildReason(
+  sourceProductId: string,
+  targetProductId: string,
+  factor: number,
+): string {
+  const base = `Clientes que compran ${sourceProductId} tambien compran ${targetProductId}.`;
+
+  if (factor > 1) {
+    return `${base} Reforzado por feedback positivo de recomendaciones.`;
+  }
+
+  if (factor < 1) {
+    return `${base} Atenuado por feedback negativo de recomendaciones.`;
+  }
+
+  return base;
 }

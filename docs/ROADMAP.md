@@ -21,8 +21,8 @@
 ## Near-term (Phase 2 -> 3 bridge)
 
 - [ ] Persist precomputed statistics and graph
-- [ ] Read endpoint for historical events
-- [ ] Feed recommendation feedback into ranking
+- [x] Read endpoint for historical events
+- [x] Feed recommendation feedback into ranking
 - [ ] Per-customer segmentation
 - [ ] Integration tests against a real PostgreSQL
 

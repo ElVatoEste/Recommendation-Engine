@@ -92,8 +92,14 @@ Available routes:
 - `GET /stats/products`
 - `GET /graph/co-purchases?productId=bread&limit=5`
 - `GET /associations?productId=bread&limit=5`
+- `GET /feedback/stats`
+- `GET /events?limit=50`
 - `POST /events`
 - `POST /events/purchase`
+
+Association ranking is reweighted by recommendation feedback: `RecommendationAccepted`
+and `RecommendationIgnored` events raise or lower a target's `feedbackFactor`, which
+scales its `adjustedScore` and can reorder results.
 
 Example purchase ingestion:
 
@@ -168,6 +174,8 @@ apps/
   playground/           sample dataset runner
 packages/
   engine/               orchestration layer
+  feedback/             recommendation feedback tracker
+  graph/                co-purchase graph
   ranking/              ranking strategies
   shared/               shared domain types and validation
   statistics/           incremental product statistics

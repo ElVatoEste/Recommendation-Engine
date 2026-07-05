@@ -126,6 +126,26 @@ async function main(): Promise<void> {
         return;
       }
 
+      if (method === "GET" && url.pathname === "/feedback/stats") {
+        sendJson(response, 200, {
+          feedback: engine.getFeedbackStats(),
+        });
+        return;
+      }
+
+      if (method === "GET" && url.pathname === "/events") {
+        const limit = Number(url.searchParams.get("limit") ?? "50");
+        const all = await eventStore.getAll();
+        const events = limit > 0 ? all.slice(-limit) : all;
+
+        sendJson(response, 200, {
+          total: all.length,
+          returned: events.length,
+          events,
+        });
+        return;
+      }
+
       if (method === "GET" && url.pathname === "/associations") {
         const productId = url.searchParams.get("productId") ?? "";
         const limit = Number(url.searchParams.get("limit") ?? "10");
@@ -172,6 +192,8 @@ async function main(): Promise<void> {
           "GET /stats/products",
           "GET /graph/co-purchases?productId=bread&limit=5",
           "GET /associations?productId=bread&limit=5",
+          "GET /feedback/stats",
+          "GET /events?limit=50",
           "POST /events",
           "POST /events/purchase",
         ],

@@ -115,4 +115,41 @@ describe("RecommendationEngine", () => {
     expect(engine.getSnapshot().totalEvents).toBe(3);
     expect(engine.getProductStats("bread")?.purchaseCount).toBe(3);
   });
+
+  it("lets recommendation feedback reorder associations", async () => {
+    const engine = new RecommendationEngine(new InMemoryEventStore());
+
+    await engine.initialize();
+
+    for (const event of seedEvents) {
+      await engine.ingestEvent(event);
+    }
+
+    const before = engine.getAssociations("bread", 5);
+    expect(before[0]?.targetProductId).toBe("butter");
+    expect(before[0]?.feedbackFactor).toBe(1);
+    expect(before[0]?.adjustedScore).toBe(before[0]?.lift);
+
+    // Ignore the bread -> butter recommendation twice: factor drops below 1
+    // and butter's adjusted score falls under milk's.
+    for (const id of ["fb-1", "fb-2"]) {
+      await engine.ingestEvent({
+        id,
+        type: "RecommendationIgnored",
+        occurredAt: "2026-07-04T11:00:00.000Z",
+        recommendationProductId: "butter",
+        sourceProductId: "bread",
+      });
+    }
+
+    const after = engine.getAssociations("bread", 5);
+    const butter = after.find((item) => item.targetProductId === "butter");
+
+    expect(butter?.feedbackFactor).toBeLessThan(1);
+    expect(butter?.adjustedScore).toBeLessThan(butter?.lift ?? 0);
+    expect(after[0]?.targetProductId).toBe("milk");
+
+    const stats = engine.getFeedbackStats();
+    expect(stats.find((s) => s.targetProductId === "butter")?.ignored).toBe(2);
+  });
 });
