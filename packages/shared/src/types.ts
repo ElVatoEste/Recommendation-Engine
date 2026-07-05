@@ -188,6 +188,18 @@ export interface HybridRecommendation {
   reason: string;
 }
 
+export interface ProductSimilarity {
+  productId: string;
+  score: number;
+  reason: string;
+}
+
+export interface EmbeddingRecommendation {
+  productId: string;
+  score: number;
+  reason: string;
+}
+
 export interface GraphNode {
   id: string;
   purchaseCount: number;

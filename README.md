@@ -94,6 +94,8 @@ bun run cli customer c-1              # profile + collaborative recs + similar
 bun run cli hybrid c-1                # blended popularity + association + collaborative + trend
 bun run cli hybrid c-1 --w-collab 1 --w-pop 0 --w-assoc 0 --w-trend 0
 bun run cli trending                  # products with recent momentum
+bun run cli similar-products bread    # embedding neighbors (shared context)
+bun run cli embedding c-1             # embedding-based recommendations
 bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
@@ -129,6 +131,8 @@ Available routes:
 - `GET /customers/:id/profile`
 - `GET /customers/:id/recommendations?limit=5`
 - `GET /customers/:id/similar?limit=5`
+- `GET /customers/:id/embedding-recommendations?limit=5`
+- `GET /products/:id/similar?limit=5` (embedding-based)
 - `GET /graph`
 - `GET /graph/view` — interactive graph visualizer (open in a browser)
 - `POST /events`
@@ -213,6 +217,7 @@ apps/
 packages/
   engine/               orchestration layer
   customers/            customer profiles + collaborative filtering
+  embeddings/           co-occurrence product embeddings
   feedback/             recommendation feedback tracker
   graph/                co-purchase graph
   hybrid/               weighted multi-signal ranking

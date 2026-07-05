@@ -36,7 +36,7 @@
 
 ## Phase 4 - Hybrid Intelligence
 
-- [ ] Embeddings and ML-assisted scoring
+- [x] Embeddings and ML-assisted scoring
 - [x] Hybrid ranking pipeline
 - [x] Trend / momentum signals
 - [ ] Evaluation and benchmarking

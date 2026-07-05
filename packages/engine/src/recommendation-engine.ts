@@ -2,6 +2,7 @@ import {
   CollaborativeRecommender,
   CustomerProfileTracker,
 } from "../../customers/src/index.ts";
+import { ProductEmbeddingIndex } from "../../embeddings/src/index.ts";
 import { RecommendationFeedbackTracker } from "../../feedback/src/index.ts";
 import { CoPurchaseGraphTracker } from "../../graph/src/index.ts";
 import { HybridRecommender } from "../../hybrid/src/index.ts";
@@ -16,7 +17,9 @@ import {
   type CustomerProfile,
   type CustomerRecommendation,
   type CustomerSimilarity,
+  type EmbeddingRecommendation,
   type EngineSnapshot,
+  type ProductSimilarity,
   type EventStore,
   type FeedbackStats,
   type HybridRecommendation,
@@ -192,6 +195,24 @@ export class RecommendationEngine {
       { popularity, association, collaborative, trend },
       limit,
       weights,
+    );
+  }
+
+  getSimilarProducts(productId: string, limit = 10): ProductSimilarity[] {
+    return new ProductEmbeddingIndex(this.getGraph()).similar(productId, limit);
+  }
+
+  getEmbeddingRecommendations(
+    customerId: string,
+    limit = 10,
+  ): EmbeddingRecommendation[] {
+    const owned = (this.customers.getProfile(customerId)?.products ?? []).map(
+      (product) => product.productId,
+    );
+
+    return new ProductEmbeddingIndex(this.getGraph()).recommendForProducts(
+      owned,
+      limit,
     );
   }
 

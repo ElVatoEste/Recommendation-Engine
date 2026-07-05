@@ -5,8 +5,10 @@ import type {
   CustomerProfile,
   CustomerRecommendation,
   CustomerSimilarity,
+  EmbeddingRecommendation,
   FeedbackStats,
   HybridRecommendation,
+  ProductSimilarity,
   HybridWeights,
   PopularRecommendation,
   ProductStats,
@@ -173,6 +175,28 @@ export class RecommendationApiClient {
 
   graph(): Promise<CoPurchaseGraph> {
     return this.request<CoPurchaseGraph>("/graph");
+  }
+
+  async similarProducts(
+    productId: string,
+    limit: number,
+  ): Promise<ProductSimilarity[]> {
+    const body = await this.request<{ similar: ProductSimilarity[] }>(
+      `/products/${encodeURIComponent(productId)}/similar?limit=${limit}`,
+    );
+    return body.similar;
+  }
+
+  async embeddingRecommendations(
+    customerId: string,
+    limit: number,
+  ): Promise<EmbeddingRecommendation[]> {
+    const body = await this.request<{
+      recommendations: EmbeddingRecommendation[];
+    }>(
+      `/customers/${encodeURIComponent(customerId)}/embedding-recommendations?limit=${limit}`,
+    );
+    return body.recommendations;
   }
 
   async trending(limit: number, windowDays?: number): Promise<TrendStat[]> {

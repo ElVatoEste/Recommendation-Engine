@@ -13,12 +13,14 @@ import {
   renderCustomerProfile,
   renderCustomerRecommendations,
   renderCustomers,
+  renderEmbeddingRecommendations,
   renderEvents,
   renderFeedback,
   renderGraph,
   renderHybrid,
   renderPopular,
   renderSimilarCustomers,
+  renderSimilarProducts,
   renderStats,
   renderTrends,
 } from "./render.ts";
@@ -142,6 +144,33 @@ program
     if (!items) return;
     heading(customer ? `Hybrid recommendations: ${customer}` : "Hybrid recommendations");
     renderHybrid(items);
+  });
+
+program
+  .command("similar-products <product>")
+  .alias("similar")
+  .description("products with a similar purchase context (embeddings)")
+  .option("-l, --limit <n>", "number of products", "10")
+  .action(async (product, options) => {
+    const items = await withSpinner(`Finding products similar to ${product}`, () =>
+      client().similarProducts(product, Number(options.limit)),
+    );
+    if (!items) return;
+    heading(`Similar to: ${product}`);
+    renderSimilarProducts(items);
+  });
+
+program
+  .command("embedding <customer>")
+  .description("embedding-based recommendations for a customer")
+  .option("-l, --limit <n>", "number of recommendations", "10")
+  .action(async (customer, options) => {
+    const items = await withSpinner(`Embedding recommendations for ${customer}`, () =>
+      client().embeddingRecommendations(customer, Number(options.limit)),
+    );
+    if (!items) return;
+    heading(`Embedding recommendations: ${customer}`);
+    renderEmbeddingRecommendations(items);
   });
 
 program

@@ -8,8 +8,10 @@ import type {
   CustomerProfile,
   CustomerRecommendation,
   CustomerSimilarity,
+  EmbeddingRecommendation,
   FeedbackStats,
   HybridRecommendation,
+  ProductSimilarity,
   PopularRecommendation,
   ProductStats,
   RecommendationEvent,
@@ -179,6 +181,30 @@ export function renderHybrid(items: HybridRecommendation[]): void {
       bar(item.components.trend),
       pc.dim(item.reason),
     ]);
+  }
+  console.log(t.toString());
+}
+
+export function renderSimilarProducts(items: ProductSimilarity[]): void {
+  if (items.length === 0) return renderEmpty("no similar products");
+
+  const t = table(["Product", "Similarity", "Why"]);
+  for (const item of items) {
+    t.push([pc.bold(item.productId), pc.cyan(item.score.toFixed(4)), pc.dim(item.reason)]);
+  }
+  console.log(t.toString());
+}
+
+export function renderEmbeddingRecommendations(
+  items: EmbeddingRecommendation[],
+): void {
+  if (items.length === 0) {
+    return renderEmpty("no embedding recommendations (needs purchase history)");
+  }
+
+  const t = table(["Product", "Score", "Why"]);
+  for (const item of items) {
+    t.push([pc.bold(item.productId), pc.yellow(item.score.toFixed(4)), pc.dim(item.reason)]);
   }
   console.log(t.toString());
 }

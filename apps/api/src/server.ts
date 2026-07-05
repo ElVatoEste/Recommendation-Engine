@@ -194,6 +194,20 @@ async function main(): Promise<void> {
         return;
       }
 
+      if (method === "GET" && url.pathname.startsWith("/products/")) {
+        const segments = url.pathname.split("/").filter(Boolean);
+        const productId = decodeURIComponent(segments[1] ?? "");
+        const limit = Number(url.searchParams.get("limit") ?? "10");
+
+        if (productId && segments[2] === "similar" && segments.length === 3) {
+          sendJson(response, 200, {
+            productId,
+            similar: engine.getSimilarProducts(productId, limit),
+          });
+          return;
+        }
+      }
+
       if (method === "GET" && url.pathname === "/graph/view") {
         sendHtml(response, GRAPH_VIEW_HTML);
         return;
@@ -243,6 +257,14 @@ async function main(): Promise<void> {
           sendJson(response, 200, {
             customerId,
             similar: engine.getSimilarCustomers(customerId, limit),
+          });
+          return;
+        }
+
+        if (resource === "embedding-recommendations" && segments.length === 3) {
+          sendJson(response, 200, {
+            customerId,
+            recommendations: engine.getEmbeddingRecommendations(customerId, limit),
           });
           return;
         }
@@ -317,6 +339,8 @@ async function main(): Promise<void> {
           "GET /customers/:id/profile",
           "GET /customers/:id/recommendations?limit=5",
           "GET /customers/:id/similar?limit=5",
+          "GET /customers/:id/embedding-recommendations?limit=5",
+          "GET /products/:id/similar?limit=5",
           "POST /events",
           "POST /events/purchase",
         ],

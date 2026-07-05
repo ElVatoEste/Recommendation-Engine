@@ -25,6 +25,8 @@ Recommendation Engine
   |
   +--> Customer Profiles -> Collaborative Recommender (set similarity)
   |
+  +--> Product Embeddings (co-occurrence vectors, item-item + taste-profile)
+  |
   +--> Trend Tracker (recent-vs-previous window momentum)
   |
   +--> Hybrid Recommender (weighted blend of popularity + association + collaborative + trend)
@@ -40,6 +42,7 @@ Recommendation Engine
 - `packages/feedback`: recommendation feedback tracking and scoring
 - `packages/similarity`: set-similarity metrics (Jaccard, cosine)
 - `packages/customers`: customer profiles and user-based collaborative filtering
+- `packages/embeddings`: co-occurrence product embeddings and taste-profile scoring
 - `packages/trends`: windowed trend/momentum signals
 - `packages/hybrid`: weighted, explainable blend of the ranking signals
 - `packages/engine`: orchestration layer over ingestion and queries
