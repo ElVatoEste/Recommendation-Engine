@@ -1,3 +1,7 @@
+import {
+  CollaborativeRecommender,
+  CustomerProfileTracker,
+} from "../../customers/src/index.ts";
 import { RecommendationFeedbackTracker } from "../../feedback/src/index.ts";
 import { CoPurchaseGraphTracker } from "../../graph/src/index.ts";
 import {
@@ -7,6 +11,10 @@ import {
 import {
   type AssociationRecommendation,
   type CoPurchaseEdge,
+  type CoPurchaseGraph,
+  type CustomerProfile,
+  type CustomerRecommendation,
+  type CustomerSimilarity,
   type EngineSnapshot,
   type EventStore,
   type FeedbackStats,
@@ -19,6 +27,8 @@ import { ProductStatisticsTracker } from "../../statistics/src/index.ts";
 export class RecommendationEngine {
   private readonly associationRanker = new AssociationRanker();
   private readonly coPurchaseGraph = new CoPurchaseGraphTracker();
+  private readonly collaborative = new CollaborativeRecommender();
+  private readonly customers = new CustomerProfileTracker();
   private readonly feedback = new RecommendationFeedbackTracker();
   private readonly ranker = new PopularProductsRanker();
   private readonly statistics = new ProductStatisticsTracker();
@@ -85,6 +95,43 @@ export class RecommendationEngine {
     return this.feedback.getStats();
   }
 
+  getCustomerProfile(customerId: string): CustomerProfile | undefined {
+    return this.customers.getProfile(customerId);
+  }
+
+  getAllCustomers(): CustomerProfile[] {
+    return this.customers.getAllProfiles();
+  }
+
+  getCustomerRecommendations(
+    customerId: string,
+    limit = 10,
+  ): CustomerRecommendation[] {
+    return this.collaborative.recommend(
+      customerId,
+      this.customers.getProductSets(),
+      limit,
+    );
+  }
+
+  getSimilarCustomers(customerId: string, limit = 10): CustomerSimilarity[] {
+    return this.collaborative.getSimilarCustomers(
+      customerId,
+      this.customers.getProductSets(),
+      limit,
+    );
+  }
+
+  getGraph(): CoPurchaseGraph {
+    const purchaseCounts = new Map(
+      this.statistics
+        .getAllProductStats()
+        .map((stats) => [stats.productId, stats.purchaseCount]),
+    );
+
+    return this.coPurchaseGraph.getGraph(purchaseCounts);
+  }
+
   getSnapshot(): EngineSnapshot {
     const productStats = this.statistics.getAllProductStats();
 
@@ -92,6 +139,7 @@ export class RecommendationEngine {
       totalEvents: this.totalEvents,
       totalPurchases: this.statistics.getTotalPurchases(),
       uniqueProducts: this.statistics.getUniqueProducts(),
+      uniqueCustomers: this.customers.getUniqueCustomers(),
       productStats,
     };
   }
@@ -105,6 +153,7 @@ export class RecommendationEngine {
       case "PurchaseCreated":
         this.statistics.registerPurchase(event);
         this.coPurchaseGraph.registerPurchase(event);
+        this.customers.registerPurchase(event);
         return;
       case "RecommendationAccepted":
         this.feedback.registerAccepted(event);

@@ -152,4 +152,33 @@ describe("RecommendationEngine", () => {
     const stats = engine.getFeedbackStats();
     expect(stats.find((s) => s.targetProductId === "butter")?.ignored).toBe(2);
   });
+
+  it("builds customer profiles, collaborative recs, and a graph", async () => {
+    const engine = new RecommendationEngine(new InMemoryEventStore());
+
+    await engine.initialize();
+
+    for (const event of seedEvents) {
+      await engine.ingestEvent(event);
+    }
+
+    expect(engine.getSnapshot().uniqueCustomers).toBe(4);
+
+    const profile = engine.getCustomerProfile("customer-1");
+    expect(profile?.uniqueProducts).toBe(2);
+    expect(profile?.products.map((p) => p.productId)).toEqual(["bread", "milk"]);
+
+    // customer-4 bought only milk; customer-1 and customer-2 (bread + milk)
+    // are the neighbors, so bread is recommended.
+    const recs = engine.getCustomerRecommendations("customer-4");
+    expect(recs[0]?.productId).toBe("bread");
+    expect(recs[0]?.supportingCustomers).toBe(2);
+
+    const graph = engine.getGraph();
+    const breadMilk = graph.edges.find(
+      (edge) => edge.source === "bread" && edge.target === "milk",
+    );
+    expect(breadMilk?.weight).toBe(2);
+    expect(graph.nodes.find((node) => node.id === "bread")?.purchaseCount).toBe(3);
+  });
 });

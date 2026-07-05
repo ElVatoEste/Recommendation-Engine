@@ -4,6 +4,10 @@ import pc from "picocolors";
 import type {
   AssociationRecommendation,
   CoPurchaseEdge,
+  CoPurchaseGraph,
+  CustomerProfile,
+  CustomerRecommendation,
+  CustomerSimilarity,
   FeedbackStats,
   PopularRecommendation,
   ProductStats,
@@ -151,6 +155,89 @@ export function renderEvents(events: RecommendationEvent[]): void {
     ]);
   }
   console.log(t.toString());
+}
+
+export function renderCustomers(items: CustomerProfile[]): void {
+  if (items.length === 0) return renderEmpty("no customers yet");
+
+  const t = table(["Customer", "Orders", "Products", "Spend", "Last seen"]);
+  for (const item of items) {
+    t.push([
+      pc.bold(item.customerId),
+      item.orderCount,
+      item.uniqueProducts,
+      pc.green(money(item.totalSpend)),
+      pc.dim(item.lastSeenAt),
+    ]);
+  }
+  console.log(t.toString());
+}
+
+export function renderCustomerProfile(profile: CustomerProfile): void {
+  console.log(
+    `  ${pc.dim("orders")} ${pc.bold(String(profile.orderCount))}   ` +
+      `${pc.dim("products")} ${pc.bold(String(profile.uniqueProducts))}   ` +
+      `${pc.dim("spend")} ${pc.green(money(profile.totalSpend))}   ` +
+      `${pc.dim("since")} ${pc.dim(profile.firstSeenAt)}`,
+  );
+
+  const t = table(["Product", "Times bought"]);
+  for (const product of profile.products) {
+    t.push([pc.bold(product.productId), pc.yellow(String(product.purchaseCount))]);
+  }
+  console.log(t.toString());
+}
+
+export function renderCustomerRecommendations(
+  items: CustomerRecommendation[],
+): void {
+  if (items.length === 0) {
+    return renderEmpty("no collaborative recommendations (needs similar customers)");
+  }
+
+  const t = table(["Product", "Score", "Similar buyers", "Why"]);
+  for (const item of items) {
+    t.push([
+      pc.bold(item.productId),
+      pc.yellow(item.score.toFixed(4)),
+      String(item.supportingCustomers),
+      pc.dim(item.reason),
+    ]);
+  }
+  console.log(t.toString());
+}
+
+export function renderSimilarCustomers(items: CustomerSimilarity[]): void {
+  if (items.length === 0) return renderEmpty("no similar customers");
+
+  const t = table(["Customer", "Similarity", "Shared products"]);
+  for (const item of items) {
+    t.push([
+      pc.bold(item.customerId),
+      pc.cyan(item.score.toFixed(4)),
+      String(item.sharedProducts),
+    ]);
+  }
+  console.log(t.toString());
+}
+
+export function renderGraph(graph: CoPurchaseGraph, viewUrl: string): void {
+  if (graph.nodes.length === 0) return renderEmpty("graph is empty");
+
+  console.log(
+    `  ${pc.bold(String(graph.nodes.length))} products · ` +
+      `${pc.bold(String(graph.edges.length))} edges`,
+  );
+
+  const t = table(["Source", "Target", "Weight"]);
+  for (const edge of graph.edges.slice(0, 15)) {
+    t.push([pc.bold(edge.source), pc.bold(edge.target), pc.yellow(String(edge.weight))]);
+  }
+  console.log(t.toString());
+  if (graph.edges.length > 15) {
+    console.log(pc.dim(`  … and ${graph.edges.length - 15} more edges`));
+  }
+  console.log(`\n  ${pc.dim("Visual graph:")} ${pc.cyan(viewUrl)}`);
 }
 
 function summarizeEvent(event: RecommendationEvent): string {

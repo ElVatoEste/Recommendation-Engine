@@ -22,6 +22,8 @@ Recommendation Engine
   +--> Association Ranker (reweighted by feedback)
   |
   +--> Recommendation Feedback Tracker
+  |
+  +--> Customer Profiles -> Collaborative Recommender (set similarity)
 ```
 
 ## Current packages
@@ -32,6 +34,8 @@ Recommendation Engine
 - `packages/statistics`: incremental product statistics
 - `packages/ranking`: recommendation ranking strategies
 - `packages/feedback`: recommendation feedback tracking and scoring
+- `packages/similarity`: set-similarity metrics (Jaccard, cosine)
+- `packages/customers`: customer profiles and user-based collaborative filtering
 - `packages/engine`: orchestration layer over ingestion and queries
 - `apps/api`: local HTTP API for manual testing
 - `apps/cli`: HTTP client CLI (tables, colors, interactive purchase, dataset seeding)

@@ -8,6 +8,7 @@ import {
   validateRecommendationEvent,
 } from "../../../packages/shared/src/index.ts";
 import { createEventStoreFromEnvironment } from "../../../packages/storage/src/index.ts";
+import { GRAPH_VIEW_HTML } from "./graph-view.ts";
 
 const eventStore = createEventStoreFromEnvironment();
 const engine = new RecommendationEngine(eventStore);
@@ -23,6 +24,11 @@ function sendJson(
     "content-type": "application/json; charset=utf-8",
   });
   response.end(JSON.stringify(payload, null, 2));
+}
+
+function sendHtml(response: ServerResponse, html: string): void {
+  response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+  response.end(html);
 }
 
 async function readJsonBody(request: IncomingMessage): Promise<unknown> {
@@ -133,6 +139,60 @@ async function main(): Promise<void> {
         return;
       }
 
+      if (method === "GET" && url.pathname === "/graph/view") {
+        sendHtml(response, GRAPH_VIEW_HTML);
+        return;
+      }
+
+      if (method === "GET" && url.pathname === "/graph") {
+        sendJson(response, 200, engine.getGraph());
+        return;
+      }
+
+      if (method === "GET" && url.pathname === "/customers") {
+        sendJson(response, 200, { customers: engine.getAllCustomers() });
+        return;
+      }
+
+      if (method === "GET" && url.pathname.startsWith("/customers/")) {
+        const segments = url.pathname.split("/").filter(Boolean);
+        const customerId = decodeURIComponent(segments[1] ?? "");
+        const resource = segments[2];
+        const limit = Number(url.searchParams.get("limit") ?? "10");
+
+        if (!customerId) {
+          throw new Error("Customer id is required.");
+        }
+
+        if (resource === "profile" && segments.length === 3) {
+          const profile = engine.getCustomerProfile(customerId);
+          if (!profile) {
+            sendJson(response, 404, {
+              error: `Unknown customer: ${customerId}`,
+            });
+            return;
+          }
+          sendJson(response, 200, profile);
+          return;
+        }
+
+        if (resource === "recommendations" && segments.length === 3) {
+          sendJson(response, 200, {
+            customerId,
+            recommendations: engine.getCustomerRecommendations(customerId, limit),
+          });
+          return;
+        }
+
+        if (resource === "similar" && segments.length === 3) {
+          sendJson(response, 200, {
+            customerId,
+            similar: engine.getSimilarCustomers(customerId, limit),
+          });
+          return;
+        }
+      }
+
       if (method === "GET" && url.pathname === "/events") {
         const limit = Number(url.searchParams.get("limit") ?? "50");
         const all = await eventStore.getAll();
@@ -194,6 +254,12 @@ async function main(): Promise<void> {
           "GET /associations?productId=bread&limit=5",
           "GET /feedback/stats",
           "GET /events?limit=50",
+          "GET /graph",
+          "GET /graph/view",
+          "GET /customers",
+          "GET /customers/:id/profile",
+          "GET /customers/:id/recommendations?limit=5",
+          "GET /customers/:id/similar?limit=5",
           "POST /events",
           "POST /events/purchase",
         ],

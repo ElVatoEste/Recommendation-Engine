@@ -89,10 +89,16 @@ bun run cli co-purchases bread
 bun run cli stats
 bun run cli feedback
 bun run cli events --limit 20
+bun run cli customers                 # customer profiles
+bun run cli customer c-1              # profile + collaborative recs + similar
+bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
 bun run cli health
 ```
+
+Open `http://localhost:3000/graph/view` in a browser for an interactive,
+force-directed view of the co-purchase graph.
 
 Target a non-default API with `--api <url>` or the `API_URL` environment variable.
 
@@ -114,6 +120,12 @@ Available routes:
 - `GET /associations?productId=bread&limit=5`
 - `GET /feedback/stats`
 - `GET /events?limit=50`
+- `GET /customers`
+- `GET /customers/:id/profile`
+- `GET /customers/:id/recommendations?limit=5`
+- `GET /customers/:id/similar?limit=5`
+- `GET /graph`
+- `GET /graph/view` — interactive graph visualizer (open in a browser)
 - `POST /events`
 - `POST /events/purchase`
 
@@ -195,10 +207,12 @@ apps/
   playground/           sample dataset runner
 packages/
   engine/               orchestration layer
+  customers/            customer profiles + collaborative filtering
   feedback/             recommendation feedback tracker
   graph/                co-purchase graph
   ranking/              ranking strategies
   shared/               shared domain types and validation
+  similarity/           set-similarity metrics (Jaccard, cosine)
   statistics/           incremental product statistics
   storage/              event storage abstractions
 docs/

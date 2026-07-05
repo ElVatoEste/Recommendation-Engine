@@ -130,10 +130,56 @@ export interface FeedbackStats {
   factor: number;
 }
 
+export interface CustomerProductAffinity {
+  productId: string;
+  purchaseCount: number;
+}
+
+export interface CustomerProfile {
+  customerId: string;
+  orderCount: number;
+  totalSpend: number;
+  uniqueProducts: number;
+  products: CustomerProductAffinity[];
+  firstSeenAt: string;
+  lastSeenAt: string;
+}
+
+export interface CustomerSimilarity {
+  customerId: string;
+  score: number;
+  sharedProducts: number;
+}
+
+export interface CustomerRecommendation {
+  productId: string;
+  score: number;
+  supportingCustomers: number;
+  reason: string;
+}
+
+export interface GraphNode {
+  id: string;
+  purchaseCount: number;
+  degree: number;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  weight: number;
+}
+
+export interface CoPurchaseGraph {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
 export interface EngineSnapshot {
   totalEvents: number;
   totalPurchases: number;
   uniqueProducts: number;
+  uniqueCustomers: number;
   productStats: ProductStats[];
 }
 

@@ -10,9 +10,14 @@ import { ApiError, RecommendationApiClient } from "./client.ts";
 import {
   renderAssociations,
   renderCoPurchases,
+  renderCustomerProfile,
+  renderCustomerRecommendations,
+  renderCustomers,
   renderEvents,
   renderFeedback,
+  renderGraph,
   renderPopular,
+  renderSimilarCustomers,
   renderStats,
 } from "./render.ts";
 import { SAMPLE_FEEDBACK, SAMPLE_ORDERS } from "./seed.ts";
@@ -117,7 +122,7 @@ program
 
 program
   .command("co-purchases <product>")
-  .alias("graph")
+  .alias("co")
   .description("show products co-purchased with a product")
   .option("-l, --limit <n>", "number of edges", "10")
   .action(async (product, options) => {
@@ -151,6 +156,54 @@ program
     if (!body) return;
     heading("Recommendation feedback");
     renderFeedback(body.feedback);
+  });
+
+program
+  .command("customers")
+  .description("list customer profiles")
+  .action(async () => {
+    const items = await withSpinner("Fetching customers", () =>
+      client().customers(),
+    );
+    if (!items) return;
+    heading("Customers");
+    renderCustomers(items);
+  });
+
+program
+  .command("customer <id>")
+  .description("show a customer profile with collaborative recommendations")
+  .option("-l, --limit <n>", "number of recommendations", "10")
+  .action(async (id, options) => {
+    const limit = Number(options.limit);
+    const api = client();
+
+    const result = await withSpinner(`Fetching customer ${id}`, async () => {
+      const profile = await api.customerProfile(id);
+      const [recommendations, similar] = await Promise.all([
+        api.customerRecommendations(id, limit),
+        api.similarCustomers(id, limit),
+      ]);
+      return { profile, recommendations, similar };
+    });
+    if (!result) return;
+
+    heading(`Customer: ${id}`);
+    renderCustomerProfile(result.profile);
+    heading("Recommended for this customer");
+    renderCustomerRecommendations(result.recommendations);
+    heading("Similar customers");
+    renderSimilarCustomers(result.similar);
+  });
+
+program
+  .command("graph")
+  .description("show the co-purchase graph and the visual viewer URL")
+  .action(async () => {
+    const graph = await withSpinner("Fetching graph", () => client().graph());
+    if (!graph) return;
+    heading("Co-purchase graph");
+    renderGraph(graph, `${program.opts().api}/graph/view`);
   });
 
 program

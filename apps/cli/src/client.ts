@@ -1,6 +1,10 @@
 import type {
   AssociationRecommendation,
   CoPurchaseEdge,
+  CoPurchaseGraph,
+  CustomerProfile,
+  CustomerRecommendation,
+  CustomerSimilarity,
   FeedbackStats,
   PopularRecommendation,
   ProductStats,
@@ -127,5 +131,44 @@ export class RecommendationApiClient {
       method: "POST",
       body: JSON.stringify(payload),
     });
+  }
+
+  async customers(): Promise<CustomerProfile[]> {
+    const body = await this.request<{ customers: CustomerProfile[] }>(
+      "/customers",
+    );
+    return body.customers;
+  }
+
+  customerProfile(customerId: string): Promise<CustomerProfile> {
+    return this.request<CustomerProfile>(
+      `/customers/${encodeURIComponent(customerId)}/profile`,
+    );
+  }
+
+  async customerRecommendations(
+    customerId: string,
+    limit: number,
+  ): Promise<CustomerRecommendation[]> {
+    const body = await this.request<{
+      recommendations: CustomerRecommendation[];
+    }>(
+      `/customers/${encodeURIComponent(customerId)}/recommendations?limit=${limit}`,
+    );
+    return body.recommendations;
+  }
+
+  async similarCustomers(
+    customerId: string,
+    limit: number,
+  ): Promise<CustomerSimilarity[]> {
+    const body = await this.request<{ similar: CustomerSimilarity[] }>(
+      `/customers/${encodeURIComponent(customerId)}/similar?limit=${limit}`,
+    );
+    return body.similar;
+  }
+
+  graph(): Promise<CoPurchaseGraph> {
+    return this.request<CoPurchaseGraph>("/graph");
   }
 }

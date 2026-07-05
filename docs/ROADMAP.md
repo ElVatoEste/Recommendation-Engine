@@ -15,23 +15,24 @@
 
 - [x] Product co-purchase graph
 - [x] Association metrics
-- [ ] Similarity calculations
+- [x] Similarity calculations
 - [x] Explainable co-purchase recommendations
+- [x] Interactive co-purchase graph visualizer
 
 ## Near-term (Phase 2 -> 3 bridge)
 
 - [ ] Persist precomputed statistics and graph
 - [x] Read endpoint for historical events
 - [x] Feed recommendation feedback into ranking
-- [ ] Per-customer segmentation
+- [x] Per-customer segmentation (profiles)
 - [ ] Integration tests against a real PostgreSQL
 
 ## Phase 3 - Personalization
 
-- [ ] User profiles
-- [ ] Collaborative filtering
+- [x] User profiles
+- [x] Collaborative filtering
 - [ ] Ranking composition
-- [ ] Recommendation explanations
+- [x] Recommendation explanations
 
 ## Phase 4 - Hybrid Intelligence
 

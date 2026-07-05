@@ -1,5 +1,6 @@
 import type {
   CoPurchaseEdge,
+  CoPurchaseGraph,
   PurchaseCreatedEvent,
 } from "../../shared/src/index.ts";
 
@@ -44,6 +45,51 @@ export class CoPurchaseGraphTracker {
         return left.relatedProductId.localeCompare(right.relatedProductId);
       })
       .slice(0, limit);
+  }
+
+  /**
+   * Exports the whole graph as undirected nodes and edges. The adjacency map is
+   * symmetric, so each pair is emitted once (source < target). Node purchaseCount
+   * is filled from an external stats lookup when available.
+   */
+  getGraph(purchaseCountByProduct?: Map<string, number>): CoPurchaseGraph {
+    const edges = [];
+    const degree = new Map<string, number>();
+
+    for (const [source, neighbors] of this.adjacency) {
+      degree.set(source, neighbors.size);
+
+      for (const [target, weight] of neighbors) {
+        if (source < target) {
+          edges.push({ source, target, weight });
+        }
+      }
+    }
+
+    const nodes = [...this.adjacency.keys()]
+      .map((id) => ({
+        id,
+        purchaseCount: purchaseCountByProduct?.get(id) ?? 0,
+        degree: degree.get(id) ?? 0,
+      }))
+      .sort((left, right) => {
+        if (right.degree !== left.degree) {
+          return right.degree - left.degree;
+        }
+
+        return left.id.localeCompare(right.id);
+      });
+
+    edges.sort((left, right) => {
+      if (right.weight !== left.weight) {
+        return right.weight - left.weight;
+      }
+
+      return left.source.localeCompare(right.source) ||
+        left.target.localeCompare(right.target);
+    });
+
+    return { nodes, edges };
   }
 
   private incrementEdge(sourceProductId: string, targetProductId: string): void {
