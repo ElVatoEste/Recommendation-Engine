@@ -31,13 +31,13 @@
 
 - [x] User profiles
 - [x] Collaborative filtering
-- [ ] Ranking composition
+- [x] Ranking composition
 - [x] Recommendation explanations
 
 ## Phase 4 - Hybrid Intelligence
 
 - [ ] Embeddings and ML-assisted scoring
-- [ ] Hybrid ranking pipeline
+- [x] Hybrid ranking pipeline
 - [ ] Seasonality and trend signals
 - [ ] Evaluation and benchmarking
 

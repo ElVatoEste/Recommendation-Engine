@@ -158,6 +158,25 @@ export interface CustomerRecommendation {
   reason: string;
 }
 
+export interface HybridWeights {
+  popularity: number;
+  association: number;
+  collaborative: number;
+}
+
+export interface HybridComponents {
+  popularity: number;
+  association: number;
+  collaborative: number;
+}
+
+export interface HybridRecommendation {
+  productId: string;
+  score: number;
+  components: HybridComponents;
+  reason: string;
+}
+
 export interface GraphNode {
   id: string;
   purchaseCount: number;

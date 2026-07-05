@@ -6,6 +6,8 @@ import type {
   CustomerRecommendation,
   CustomerSimilarity,
   FeedbackStats,
+  HybridRecommendation,
+  HybridWeights,
   PopularRecommendation,
   ProductStats,
   PurchaseItem,
@@ -170,5 +172,24 @@ export class RecommendationApiClient {
 
   graph(): Promise<CoPurchaseGraph> {
     return this.request<CoPurchaseGraph>("/graph");
+  }
+
+  async hybrid(
+    customerId: string | undefined,
+    limit: number,
+    weights?: HybridWeights,
+  ): Promise<HybridRecommendation[]> {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (customerId) params.set("customer", customerId);
+    if (weights) {
+      params.set("wPop", String(weights.popularity));
+      params.set("wAssoc", String(weights.association));
+      params.set("wCollab", String(weights.collaborative));
+    }
+
+    const body = await this.request<{ recommendations: HybridRecommendation[] }>(
+      `/recommendations/hybrid?${params.toString()}`,
+    );
+    return body.recommendations;
   }
 }

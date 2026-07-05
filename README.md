@@ -91,6 +91,8 @@ bun run cli feedback
 bun run cli events --limit 20
 bun run cli customers                 # customer profiles
 bun run cli customer c-1              # profile + collaborative recs + similar
+bun run cli hybrid c-1                # blended popularity + association + collaborative
+bun run cli hybrid c-1 --w-collab 1 --w-pop 0 --w-assoc 0
 bun run cli graph                     # co-purchase edges + visualizer URL
 bun run cli purchase -i bread:1:2.5 -i milk:2:1.8 -c customer-1
 bun run cli purchase                  # interactive prompts
@@ -115,6 +117,7 @@ Available routes:
 
 - `GET /health`
 - `GET /recommendations/popular?limit=5`
+- `GET /recommendations/hybrid?customer=c-1&limit=5` (optional `wPop`, `wAssoc`, `wCollab` weights)
 - `GET /stats/products`
 - `GET /graph/co-purchases?productId=bread&limit=5`
 - `GET /associations?productId=bread&limit=5`
@@ -210,6 +213,7 @@ packages/
   customers/            customer profiles + collaborative filtering
   feedback/             recommendation feedback tracker
   graph/                co-purchase graph
+  hybrid/               weighted multi-signal ranking
   ranking/              ranking strategies
   shared/               shared domain types and validation
   similarity/           set-similarity metrics (Jaccard, cosine)

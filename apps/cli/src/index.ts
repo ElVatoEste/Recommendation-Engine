@@ -16,6 +16,7 @@ import {
   renderEvents,
   renderFeedback,
   renderGraph,
+  renderHybrid,
   renderPopular,
   renderSimilarCustomers,
   renderStats,
@@ -108,6 +109,35 @@ program
     if (!items) return;
     heading("Popular products");
     renderPopular(items);
+  });
+
+program
+  .command("hybrid [customer]")
+  .description("blended popularity + association + collaborative ranking")
+  .option("-l, --limit <n>", "number of recommendations", "10")
+  .option("--w-pop <n>", "popularity weight")
+  .option("--w-assoc <n>", "association weight")
+  .option("--w-collab <n>", "collaborative weight")
+  .action(async (customer, options) => {
+    const anyWeight =
+      options.wPop !== undefined ||
+      options.wAssoc !== undefined ||
+      options.wCollab !== undefined;
+    const weights = anyWeight
+      ? {
+          popularity: Number(options.wPop ?? 0),
+          association: Number(options.wAssoc ?? 0),
+          collaborative: Number(options.wCollab ?? 0),
+        }
+      : undefined;
+
+    const items = await withSpinner(
+      customer ? `Blending recommendations for ${customer}` : "Blending recommendations",
+      () => client().hybrid(customer, Number(options.limit), weights),
+    );
+    if (!items) return;
+    heading(customer ? `Hybrid recommendations: ${customer}` : "Hybrid recommendations");
+    renderHybrid(items);
   });
 
 program

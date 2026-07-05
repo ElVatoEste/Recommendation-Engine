@@ -9,6 +9,7 @@ import type {
   CustomerRecommendation,
   CustomerSimilarity,
   FeedbackStats,
+  HybridRecommendation,
   PopularRecommendation,
   ProductStats,
   RecommendationEvent,
@@ -152,6 +153,29 @@ export function renderEvents(events: RecommendationEvent[]): void {
       pc.cyan(event.type),
       event.customerId ?? pc.dim("-"),
       pc.dim(summarizeEvent(event)),
+    ]);
+  }
+  console.log(t.toString());
+}
+
+/** Renders a normalized component value as a compact bar. */
+function bar(value: number): string {
+  const filled = Math.round(value * 8);
+  return pc.cyan("█".repeat(filled)) + pc.dim("·".repeat(8 - filled));
+}
+
+export function renderHybrid(items: HybridRecommendation[]): void {
+  if (items.length === 0) return renderEmpty("no recommendations yet");
+
+  const t = table(["Product", "Score", "Pop", "Assoc", "Collab", "Why"]);
+  for (const item of items) {
+    t.push([
+      pc.bold(item.productId),
+      pc.yellow(item.score.toFixed(4)),
+      bar(item.components.popularity),
+      bar(item.components.association),
+      bar(item.components.collaborative),
+      pc.dim(item.reason),
     ]);
   }
   console.log(t.toString());

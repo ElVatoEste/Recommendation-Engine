@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 
 import { RecommendationEngine } from "../../../packages/engine/src/index.ts";
 import {
+  type HybridWeights,
   type RecommendationEvent,
   validatePurchaseCreatedEvent,
   validateRecommendationEvent,
@@ -29,6 +30,29 @@ function sendJson(
 function sendHtml(response: ServerResponse, html: string): void {
   response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
   response.end(html);
+}
+
+/** Reads optional wPop/wAssoc/wCollab weights; returns undefined when none set. */
+function parseWeights(
+  params: URLSearchParams,
+): HybridWeights | undefined {
+  const keys = [
+    ["wPop", "popularity"],
+    ["wAssoc", "association"],
+    ["wCollab", "collaborative"],
+  ] as const;
+
+  if (!keys.some(([query]) => params.has(query))) {
+    return undefined;
+  }
+
+  const weights = { popularity: 0, association: 0, collaborative: 0 };
+  for (const [query, key] of keys) {
+    const value = Number(params.get(query) ?? "0");
+    weights[key] = Number.isFinite(value) && value >= 0 ? value : 0;
+  }
+
+  return weights;
 }
 
 async function readJsonBody(request: IncomingMessage): Promise<unknown> {
@@ -106,6 +130,22 @@ async function main(): Promise<void> {
         sendJson(response, 200, {
           generatedAt: new Date().toISOString(),
           recommendations: engine.getPopularProducts(limit),
+        });
+        return;
+      }
+
+      if (method === "GET" && url.pathname === "/recommendations/hybrid") {
+        const limit = Number(url.searchParams.get("limit") ?? "10");
+        const customer = url.searchParams.get("customer") ?? undefined;
+        const weights = parseWeights(url.searchParams);
+
+        sendJson(response, 200, {
+          customer: customer ?? null,
+          recommendations: engine.getHybridRecommendations(
+            customer,
+            limit,
+            weights,
+          ),
         });
         return;
       }
@@ -249,6 +289,7 @@ async function main(): Promise<void> {
         availableRoutes: [
           "GET /health",
           "GET /recommendations/popular?limit=5",
+          "GET /recommendations/hybrid?customer=c-1&limit=5",
           "GET /stats/products",
           "GET /graph/co-purchases?productId=bread&limit=5",
           "GET /associations?productId=bread&limit=5",

@@ -181,4 +181,25 @@ describe("RecommendationEngine", () => {
     expect(breadMilk?.weight).toBe(2);
     expect(graph.nodes.find((node) => node.id === "bread")?.purchaseCount).toBe(3);
   });
+
+  it("produces hybrid recommendations excluding owned products", async () => {
+    const engine = new RecommendationEngine(new InMemoryEventStore());
+
+    await engine.initialize();
+
+    for (const event of seedEvents) {
+      await engine.ingestEvent(event);
+    }
+
+    // customer-4 owns only milk; bread should surface via association +
+    // collaborative signals and milk must never be recommended back.
+    const hybrid = engine.getHybridRecommendations("customer-4", 5);
+
+    expect(hybrid.length).toBeGreaterThan(0);
+    expect(hybrid.some((r) => r.productId === "milk")).toBe(false);
+    expect(hybrid[0]?.productId).toBe("bread");
+    expect(hybrid[0]?.score).toBeGreaterThan(0);
+    expect(hybrid[0]?.score).toBeLessThanOrEqual(1);
+    expect(hybrid[0]?.components).toHaveProperty("collaborative");
+  });
 });
