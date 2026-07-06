@@ -1,0 +1,215 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap");
+
+@import "tailwindcss";
+
+/* Class-based dark mode: `useTheme` toggles `.dark` / `.light` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-display: "Syne", sans-serif;
+  --font-sans: "IBM Plex Sans", sans-serif;
+
+  /* Emil-style strong easing curves. Built-in CSS easings lack punch. */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --animate-float-up: float-up 420ms var(--ease-out-strong) forwards;
+  --animate-dash: dash 18s linear infinite;
+  --animate-rise: rise 560ms var(--ease-out-strong) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.1), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #01040d 100%);
+}
+
+html {
+  background: #020617;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(8, 145, 178, 0.18), transparent 22%),
+    radial-gradient(circle at 85% 20%, rgba(109, 40, 217, 0.16), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #01040d 100%);
+  color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(103, 232, 249, 0.28);
+  color: #e0f2fe;
+}
+
+.slider {
+  appearance: none;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+  transition: background 200ms var(--ease-out-strong);
+}
+
+.slider:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid rgba(224, 242, 254, 0.9);
+  background: linear-gradient(135deg, #67e8f9, #38bdf8);
+  box-shadow: 0 0 0 6px rgba(103, 232, 249, 0.15);
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out-strong),
+    box-shadow 200ms var(--ease-out-strong);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 8px rgba(103, 232, 249, 0.22);
+}
+
+.slider:active::-webkit-slider-thumb {
+  transform: scale(0.94);
+}
+
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid rgba(224, 242, 254, 0.9);
+  background: linear-gradient(135deg, #67e8f9, #38bdf8);
+  box-shadow: 0 0 0 6px rgba(103, 232, 249, 0.15);
+  cursor: pointer;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -140;
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Section entrance. Starts from scale(0.98)+blur, never from nothing (Emil). */
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+.animate-float-up {
+  animation: var(--animate-float-up);
+}
+
+/* Staggered section reveal driven by --i on the element. */
+.reveal {
+  animation: var(--animate-rise);
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+/* Cascade direct children in on mount (Emil: sequence reads as one gesture). */
+.stagger > * {
+  animation: var(--animate-rise);
+}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 80ms; }
+.stagger > *:nth-child(3) { animation-delay: 160ms; }
+.stagger > *:nth-child(4) { animation-delay: 240ms; }
+.stagger > *:nth-child(5) { animation-delay: 320ms; }
+.stagger > *:nth-child(6) { animation-delay: 400ms; }
+.stagger > *:nth-child(n + 7) { animation-delay: 480ms; }
+
+/* Skeleton shimmer for loading states. */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 37%,
+    rgba(255, 255, 255, 0.04) 63%
+  );
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/* Reduced motion: keep opacity fades, drop movement/loops (a11y). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal,
+  .stagger > *,
+  .animate-float-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
