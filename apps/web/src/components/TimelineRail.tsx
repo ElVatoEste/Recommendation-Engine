@@ -14,10 +14,10 @@ export function TimelineRail({ events, currentEventId }: TimelineRailProps) {
         return (
           <article
             key={event.id}
-            className={`rounded-[22px] border p-4 transition-[background-color,border-color,transform,box-shadow] duration-300 ease-[var(--ease-out-strong)] ${
+            className={`rounded-xl border p-4 transition-[background-color,border-color,transform,box-shadow] duration-300 ease-[var(--ease-out-strong)] ${
               isActive
-                ? "border-cyan-300/30 bg-cyan-400/12 shadow-[0_16px_40px_-20px_rgba(34,211,238,0.6)]"
-                : "border-white/8 bg-white/[0.025] hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.04]"
+                ? "border-accent/30 bg-accent/[0.08] shadow-[0_16px_40px_-20px_rgba(245,165,36,0.55)]"
+                : "border-line bg-panel-2 hover:-translate-y-0.5 hover:border-line-strong"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -34,7 +34,7 @@ export function TimelineRail({ events, currentEventId }: TimelineRailProps) {
               </div>
               <span
                 className={`mt-1 h-2.5 w-2.5 rounded-full ${
-                  isActive ? "bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.7)]" : "bg-slate-600"
+                  isActive ? "bg-accent shadow-[0_0_16px_rgba(245,165,36,0.7)]" : "bg-neutral-600"
                 }`}
               />
             </div>

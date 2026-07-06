@@ -6,6 +6,7 @@ import type {
   CustomerRecommendation,
   CustomerSimilarity,
   EmbeddingRecommendation,
+  EngineSnapshot,
   EventsResponse,
   ExperimentReport,
   FeedbackStats,
@@ -14,6 +15,7 @@ import type {
   PopularRecommendation,
   ProductSimilarity,
   ProductStats,
+  RecommendationEvent,
   TrendStat,
 } from "./contracts";
 
@@ -33,8 +35,7 @@ function buildUrl(path: string): string {
   return `${API_BASE}${path}`;
 }
 
-async function request<T>(path: string): Promise<T> {
-  const response = await fetch(buildUrl(path));
+async function extract<T>(response: Response): Promise<T> {
   const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -48,8 +49,53 @@ async function request<T>(path: string): Promise<T> {
   return body as T;
 }
 
+async function request<T>(path: string): Promise<T> {
+  return extract<T>(await fetch(buildUrl(path)));
+}
+
+async function post<T>(path: string, payload: unknown): Promise<T> {
+  return extract<T>(
+    await fetch(buildUrl(path), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}
+
 export function buildStreamUrl(path: string): string {
   return buildUrl(path);
+}
+
+export interface HybridWeights {
+  popularity: number;
+  association: number;
+  collaborative: number;
+  trend: number;
+}
+
+export interface IngestResult {
+  message: string;
+  event: RecommendationEvent;
+  snapshot: EngineSnapshot;
+}
+
+export interface BatchResult {
+  accepted: number;
+  snapshot: EngineSnapshot;
+}
+
+export interface PurchaseInput {
+  orderId: string;
+  customerId: string;
+  items: Array<{ productId: string; quantity: number; unitPrice?: number }>;
+}
+
+export interface FeedbackInput {
+  type: "RecommendationAccepted" | "RecommendationIgnored";
+  recommendationProductId: string;
+  sourceProductId?: string;
+  customerId?: string;
 }
 
 export const observatoryApi = {
@@ -141,9 +187,20 @@ export const observatoryApi = {
   async hybridRecommendations(
     customerId: string,
     limit = 8,
+    weights?: HybridWeights,
   ): Promise<HybridRecommendation[]> {
+    const params = new URLSearchParams({
+      customer: customerId,
+      limit: String(limit),
+    });
+    if (weights) {
+      params.set("wPop", String(weights.popularity));
+      params.set("wAssoc", String(weights.association));
+      params.set("wCollab", String(weights.collaborative));
+      params.set("wTrend", String(weights.trend));
+    }
     const body = await request<{ recommendations: HybridRecommendation[] }>(
-      `/recommendations/hybrid?customer=${encodeURIComponent(customerId)}&limit=${limit}`,
+      `/recommendations/hybrid?${params.toString()}`,
     );
     return body.recommendations;
   },
@@ -153,5 +210,16 @@ export const observatoryApi = {
   },
   evaluate(k = 5): Promise<ExperimentReport | unknown> {
     return request(`/evaluate?k=${k}`);
+  },
+
+  // --- Mutations: feed the engine from the sandbox ---
+  ingestPurchase(input: PurchaseInput): Promise<IngestResult> {
+    return post<IngestResult>("/events/purchase", input);
+  },
+  ingestBatch(events: unknown[]): Promise<BatchResult> {
+    return post<BatchResult>("/events/batch", { events });
+  },
+  sendFeedback(input: FeedbackInput): Promise<IngestResult> {
+    return post<IngestResult>("/events", input);
   },
 };

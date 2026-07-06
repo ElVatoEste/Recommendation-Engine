@@ -10,9 +10,9 @@ interface GraphSceneProps {
 }
 
 const emphasisClassMap = {
-  focus: "fill-cyan-300 stroke-cyan-100",
-  highlight: "fill-emerald-300 stroke-emerald-100",
-  normal: "fill-slate-700 stroke-slate-200/80",
+  focus: "fill-accent stroke-amber-100",
+  highlight: "fill-[var(--color-s-collab)] stroke-emerald-100",
+  normal: "fill-neutral-700 stroke-neutral-300/80",
 } as const;
 
 export function GraphScene({
@@ -32,15 +32,15 @@ export function GraphScene({
 
   if (layout.nodes.length === 0) {
     return (
-      <div className="flex h-[320px] items-center justify-center rounded-[24px] border border-dashed border-white/10 bg-white/[0.025] text-sm text-slate-500">
+      <div className="flex h-[320px] items-center justify-center rounded-xl border border-dashed border-line bg-panel-2 text-sm text-neutral-500">
         No hay nodos suficientes para renderizar el grafo todavía.
       </div>
     );
   }
 
   return (
-    <div className="relative overflow-hidden rounded-[24px] border border-white/8 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.08),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))]">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.07)_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-25" />
+    <div className="relative overflow-hidden rounded-xl border border-line bg-panel-2">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.06)_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-25" />
       <svg
         viewBox={`0 0 760 ${height}`}
         className="relative h-full min-h-[320px] w-full"
@@ -62,7 +62,7 @@ export function GraphScene({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="rgba(125, 211, 252, 0.28)"
+                stroke="rgba(245, 165, 36, 0.26)"
                 strokeWidth={1 + edge.weight * 0.9}
                 strokeLinecap="round"
               />
@@ -87,7 +87,7 @@ export function GraphScene({
               r={node.radius + 9}
               className={
                 node.emphasis === "focus"
-                  ? "fill-cyan-400/15 animate-pulse"
+                  ? "fill-accent/15 animate-pulse"
                   : "fill-white/5"
               }
             />

@@ -1,119 +1,101 @@
-import type { PropsWithChildren } from "react";
+import { useEffect, type PropsWithChildren } from "react";
 import { NavLink } from "react-router-dom";
 
+import { useAsyncData } from "@/hooks/useAsyncData";
+import { observatoryApi } from "@/lib/api";
+import { formatCompactNumber } from "@/lib/format";
+import { useObservatoryStore } from "@/store/observatoryStore";
+
 const navigation = [
-  { to: "/", label: "Control Room", glyph: "CR" },
-  { to: "/laboratorio", label: "Laboratorio", glyph: "LB" },
-  { to: "/explorador", label: "Explorador", glyph: "EX" },
+  { to: "/", label: "Sandbox" },
+  { to: "/explorador", label: "Explorer" },
+  { to: "/laboratorio", label: "Playback" },
 ];
 
-const navItemBase =
-  "group flex items-center justify-between rounded-2xl border px-4 py-3 transition-[background-color,border-color,transform,box-shadow] duration-200 ease-[var(--ease-out-strong)] active:scale-[0.98]";
+function Counter({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex flex-col leading-none">
+      <span className="tnum text-sm font-semibold text-white">
+        {formatCompactNumber(value)}
+      </span>
+      <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+        {label}
+      </span>
+    </div>
+  );
+}
 
 export function AppShell({ children }: PropsWithChildren) {
-  return (
-    <div className="min-h-screen bg-[#020816] text-slate-100">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute left-[-12%] top-[-18%] h-[38rem] w-[38rem] rounded-full bg-cyan-500/12 blur-3xl" />
-        <div className="absolute right-[-10%] top-[12%] h-[32rem] w-[32rem] rounded-full bg-violet-500/10 blur-3xl" />
-        <div className="absolute bottom-[-16%] left-[25%] h-[26rem] w-[26rem] rounded-full bg-emerald-400/8 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.08),transparent_30%),linear-gradient(180deg,rgba(2,6,23,0.15),rgba(2,6,23,0.85))]" />
-      </div>
+  const { liveSnapshot, streamConnected, setLiveSnapshot, revision } =
+    useObservatoryStore();
+  const { data } = useAsyncData(() => observatoryApi.health(), [revision]);
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-[1560px] gap-6 px-4 py-4 md:px-6 lg:px-8">
-        <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] w-72 flex-col rounded-[30px] border border-white/10 bg-slate-950/65 p-6 backdrop-blur-xl lg:flex">
-          <div className="mb-10 space-y-4">
-            <div className="inline-flex w-fit items-center gap-3 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] uppercase tracking-[0.32em] text-cyan-200">
-              Recommendation Engine
-            </div>
-            <div>
-              <p className="font-display text-3xl leading-none text-white">
-                Visual Observatory
-              </p>
-              <p className="mt-3 text-sm leading-6 text-slate-400">
-                Una web para ver cómo el motor aprende, conecta productos y arma el ranking en tiempo real.
-              </p>
-            </div>
+  // Seed the store snapshot from the initial health payload.
+  useEffect(() => {
+    if (data?.snapshot && !liveSnapshot) {
+      setLiveSnapshot(data.snapshot);
+    }
+  }, [data?.snapshot, liveSnapshot, setLiveSnapshot]);
+
+  const snap = liveSnapshot ?? data?.snapshot;
+
+  return (
+    <div className="min-h-[100dvh] bg-base text-neutral-200">
+      <header className="sticky top-0 z-40 border-b border-line bg-base/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-6 px-4 md:px-6">
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-sm font-semibold tracking-tight text-white">
+              recengine
+            </span>
+            <span className="font-mono text-xs text-accent">/sandbox</span>
           </div>
 
-          <nav className="space-y-2">
-            {navigation.map(({ to, label, glyph }) => (
+          <nav className="flex items-center gap-1">
+            {navigation.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `${navItemBase} ${
+                  `rounded-md px-3 py-1.5 text-sm transition-colors duration-150 ease-[var(--ease-out-strong)] ${
                     isActive
-                      ? "border-cyan-300/35 bg-cyan-400/12 text-white shadow-[0_10px_30px_-12px_rgba(34,211,238,0.5)]"
-                      : "border-white/6 bg-white/[0.03] text-slate-300 hover:-translate-y-0.5 hover:border-white/12 hover:bg-white/[0.05]"
+                      ? "bg-white/10 text-white"
+                      : "text-neutral-400 hover:bg-white/5 hover:text-neutral-200"
                   }`
                 }
               >
-                {({ isActive }) => (
-                  <>
-                    <span className="flex items-center gap-3">
-                      <span
-                        className={`flex h-9 w-9 items-center justify-center rounded-xl text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors duration-200 ease-[var(--ease-out-strong)] ${
-                          isActive
-                            ? "bg-cyan-300/25 text-cyan-50"
-                            : "bg-white/8 text-slate-200 group-hover:bg-white/12"
-                        }`}
-                      >
-                        {glyph}
-                      </span>
-                      <span className="text-sm">{label}</span>
-                    </span>
-                    <span
-                      className={`h-2 w-2 rounded-full bg-current transition-opacity duration-200 ${
-                        isActive
-                          ? "opacity-100"
-                          : "opacity-40 group-hover:opacity-100"
-                      }`}
-                    />
-                  </>
-                )}
+                {label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="mt-auto rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500">
-              Narrativa visual
-            </p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
-              Evento entra. Señal cambia. Grafo responde. Ranking se reacomoda. La interfaz está armada para que eso se entienda sin leer el código.
-            </p>
+          <div className="ml-auto hidden items-center gap-5 md:flex">
+            <Counter label="events" value={snap?.totalEvents ?? 0} />
+            <Counter label="orders" value={snap?.totalPurchases ?? 0} />
+            <Counter label="products" value={snap?.uniqueProducts ?? 0} />
+            <Counter label="customers" value={snap?.uniqueCustomers ?? 0} />
           </div>
-        </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="mb-4 flex items-center justify-between gap-3 rounded-[24px] border border-white/10 bg-slate-950/65 px-4 py-3 backdrop-blur-xl lg:hidden">
-            <p className="font-display text-lg leading-none text-white">
-              Visual Observatory
-            </p>
-            <nav className="flex gap-1.5">
-              {navigation.map(({ to, glyph, label }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  aria-label={label}
-                  className={({ isActive }) =>
-                    `flex h-9 w-9 items-center justify-center rounded-xl border text-[11px] font-semibold uppercase tracking-[0.16em] transition-[background-color,border-color,transform] duration-200 ease-[var(--ease-out-strong)] active:scale-95 ${
-                      isActive
-                        ? "border-cyan-300/35 bg-cyan-400/15 text-cyan-50"
-                        : "border-white/8 bg-white/[0.03] text-slate-300"
-                    }`
-                  }
-                >
-                  {glyph}
-                </NavLink>
-              ))}
-            </nav>
-          </header>
-
-          <main className="relative flex-1 pb-10">{children}</main>
+          <div
+            className="flex items-center gap-2"
+            title={streamConnected ? "SSE stream live" : "SSE stream idle"}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                streamConnected
+                  ? "bg-accent shadow-[0_0_10px_var(--color-accent)]"
+                  : "bg-neutral-600"
+              }`}
+            />
+            <span className="hidden text-[11px] uppercase tracking-[0.16em] text-neutral-500 lg:inline">
+              {streamConnected ? "live" : "idle"}
+            </span>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-6 md:px-6">
+        {children}
+      </main>
     </div>
   );
 }

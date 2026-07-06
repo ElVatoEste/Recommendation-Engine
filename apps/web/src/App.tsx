@@ -5,8 +5,8 @@ import { AppShell } from "@/components/AppShell";
 import { useEventStream } from "@/hooks/useEventStream";
 import type { StreamPayload } from "@/lib/contracts";
 import Explorer from "@/pages/Explorer";
-import Home from "@/pages/Home";
 import Laboratory from "@/pages/Laboratory";
+import Sandbox from "@/pages/Sandbox";
 import { useObservatoryStore } from "@/store/observatoryStore";
 
 function ObservatoryRuntime() {
@@ -15,13 +15,15 @@ function ObservatoryRuntime() {
   const setStreamConnected = useObservatoryStore(
     (state) => state.setStreamConnected,
   );
+  const bumpRevision = useObservatoryStore((state) => state.bumpRevision);
 
   const handleMessage = useCallback(
     (payload: StreamPayload) => {
       setLatestEvent(payload.event);
       setLiveSnapshot(payload.snapshot);
+      bumpRevision();
     },
-    [setLatestEvent, setLiveSnapshot],
+    [setLatestEvent, setLiveSnapshot, bumpRevision],
   );
 
   const handleConnectionChange = useCallback(
@@ -39,9 +41,9 @@ function ObservatoryRuntime() {
   return (
     <AppShell>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/laboratorio" element={<Laboratory />} />
+        <Route path="/" element={<Sandbox />} />
         <Route path="/explorador" element={<Explorer />} />
+        <Route path="/laboratorio" element={<Laboratory />} />
       </Routes>
     </AppShell>
   );

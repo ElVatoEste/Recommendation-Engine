@@ -1,23 +1,39 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap");
 
 @import "tailwindcss";
 
-/* Class-based dark mode: `useTheme` toggles `.dark` / `.light` on <html>. */
+/* Class-based dark mode: the sandbox is dark-only, kept for future toggle. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-display: "Syne", sans-serif;
   --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Emil-style strong easing curves. Built-in CSS easings lack punch. */
+  /* Cockpit surfaces: near-black, hairline separation, no gradient cards. */
+  --color-base: #08090c;
+  --color-panel: #0d0f13;
+  --color-panel-2: #12151b;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.16);
+
+  /* One UI accent (amber). Chrome only: selection, primary action, live. */
+  --color-accent: #f5a524;
+  --color-accent-soft: rgb(245 165 36 / 0.14);
+
+  /* Restrained categorical set for algorithm strategies (data series only). */
+  --color-s-pop: #f5a524;
+  --color-s-assoc: #7aa2f7;
+  --color-s-collab: #56d4a0;
+  --color-s-trend: #e06c9f;
+
+  /* Emil-style easing. Built-in CSS easings lack punch. */
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
-  --animate-float-up: float-up 420ms var(--ease-out-strong) forwards;
-  --animate-dash: dash 18s linear infinite;
-  --animate-rise: rise 560ms var(--ease-out-strong) both;
-  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-rise: rise 420ms var(--ease-out-strong) both;
+  --animate-shimmer: shimmer 1.5s linear infinite;
+  --animate-flash: flash 900ms var(--ease-out-strong);
 }
 
 :root {
@@ -29,23 +45,17 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background:
-    radial-gradient(circle at top, rgba(34, 211, 238, 0.1), transparent 24%),
-    linear-gradient(180deg, #020617 0%, #01040d 100%);
 }
 
 html {
-  background: #020617;
+  background: var(--color-base);
 }
 
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(8, 145, 178, 0.18), transparent 22%),
-    radial-gradient(circle at 85% 20%, rgba(109, 40, 217, 0.16), transparent 24%),
-    linear-gradient(180deg, #020617 0%, #01040d 100%);
-  color: #e2e8f0;
+  background: var(--color-base);
+  color: #d7dae0;
 }
 
 * {
@@ -69,54 +79,53 @@ textarea {
 }
 
 ::selection {
-  background: rgba(103, 232, 249, 0.28);
-  color: #e0f2fe;
+  background: var(--color-accent-soft);
+  color: #fff;
 }
 
+/* Tabular figures everywhere numbers matter (data-dense UI). */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Range slider: minimal, single-accent. */
 .slider {
   appearance: none;
-  height: 10px;
+  height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-line-strong);
   outline: none;
-  transition: background 200ms var(--ease-out-strong);
-}
-
-.slider:hover {
-  background: rgba(255, 255, 255, 0.14);
 }
 
 .slider::-webkit-slider-thumb {
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 15px;
+  height: 15px;
   border-radius: 999px;
-  border: 2px solid rgba(224, 242, 254, 0.9);
-  background: linear-gradient(135deg, #67e8f9, #38bdf8);
-  box-shadow: 0 0 0 6px rgba(103, 232, 249, 0.15);
+  background: var(--color-accent);
   cursor: pointer;
-  transition:
-    transform 160ms var(--ease-out-strong),
-    box-shadow 200ms var(--ease-out-strong);
+  transition: transform 140ms var(--ease-out-strong);
 }
 
 .slider::-webkit-slider-thumb:hover {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 8px rgba(103, 232, 249, 0.22);
-}
-
-.slider:active::-webkit-slider-thumb {
-  transform: scale(0.94);
+  transform: scale(1.15);
 }
 
 .slider::-moz-range-thumb {
-  width: 22px;
-  height: 22px;
+  width: 15px;
+  height: 15px;
+  border: none;
   border-radius: 999px;
-  border: 2px solid rgba(224, 242, 254, 0.9);
-  background: linear-gradient(135deg, #67e8f9, #38bdf8);
-  box-shadow: 0 0 0 6px rgba(103, 232, 249, 0.15);
+  background: var(--color-accent);
   cursor: pointer;
+}
+
+/* Focus ring (a11y): visible on keyboard nav, single accent. */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 @keyframes dash {
@@ -125,28 +134,15 @@ textarea {
   }
 }
 
-@keyframes float-up {
+/* Content entering: never from nothing (Emil). Motivated: new data arrives. */
+@keyframes rise {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Section entrance. Starts from scale(0.98)+blur, never from nothing (Emil). */
-@keyframes rise {
-  0% {
-    opacity: 0;
-    transform: translateY(16px) scale(0.985);
-    filter: blur(6px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0);
   }
 }
 
@@ -159,41 +155,45 @@ textarea {
   }
 }
 
-.animate-float-up {
-  animation: var(--animate-float-up);
+/* Flash a row when the engine just changed it (state-change feedback). */
+@keyframes flash {
+  0% {
+    background-color: var(--color-accent-soft);
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 
-/* Staggered section reveal driven by --i on the element. */
 .reveal {
   animation: var(--animate-rise);
-  animation-delay: calc(var(--i, 0) * 70ms);
 }
 
-/* Cascade direct children in on mount (Emil: sequence reads as one gesture). */
 .stagger > * {
   animation: var(--animate-rise);
 }
 .stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 80ms; }
-.stagger > *:nth-child(3) { animation-delay: 160ms; }
-.stagger > *:nth-child(4) { animation-delay: 240ms; }
-.stagger > *:nth-child(5) { animation-delay: 320ms; }
-.stagger > *:nth-child(6) { animation-delay: 400ms; }
-.stagger > *:nth-child(n + 7) { animation-delay: 480ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(n + 5) { animation-delay: 240ms; }
 
-/* Skeleton shimmer for loading states. */
+.flash {
+  animation: var(--animate-flash);
+}
+
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.09) 37%,
-    rgba(255, 255, 255, 0.04) 63%
+    rgb(255 255 255 / 0.04) 25%,
+    rgb(255 255 255 / 0.09) 37%,
+    rgb(255 255 255 / 0.04) 63%
   );
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
+  border-radius: 6px;
 }
 
-/* Reduced motion: keep opacity fades, drop movement/loops (a11y). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -201,15 +201,12 @@ textarea {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
   }
-
   .reveal,
   .stagger > *,
-  .animate-float-up {
+  .flash {
     animation: none;
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
