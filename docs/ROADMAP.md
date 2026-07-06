@@ -25,7 +25,7 @@
 - [x] Read endpoint for historical events
 - [x] Feed recommendation feedback into ranking
 - [x] Per-customer segmentation (profiles)
-- [ ] Integration tests against a real PostgreSQL
+- [x] Integration tests against a real PostgreSQL (opt-in via RUN_PG_TESTS)
 
 ## Phase 3 - Personalization
 

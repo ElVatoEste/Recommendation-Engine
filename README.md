@@ -72,7 +72,9 @@ Run the local API (in-memory store, no database required):
 bun run dev:api
 ```
 
-Run the sample playground:
+Run the sample playground — an in-process tour of every strategy (statistics,
+associations, collaborative filtering, embeddings, trends, hybrid ranking,
+benchmarking, and an A/B report) with no server or database required:
 
 ```bash
 bun run playground
@@ -119,6 +121,13 @@ Type-check and test the workspace:
 ```bash
 bun run check
 bun run test
+```
+
+The PostgreSQL integration test is skipped by default. With a reachable database
+(migration applied) it runs via:
+
+```bash
+RUN_PG_TESTS=1 DATABASE_URL=postgres://app:app@localhost:5432/recommendation_engine bun run test:pg
 ```
 
 ## API
@@ -170,17 +179,35 @@ curl -X POST http://localhost:3000/events/purchase \
   }'
 ```
 
+## Recommendation strategies
+
+Each strategy is an independent, explainable layer. The hybrid ranker blends them.
+
+| Strategy | Signal | Explanation it produces |
+| --- | --- | --- |
+| Popular | purchase frequency + volume | "popular product #N" |
+| Association | support / confidence / lift, reweighted by feedback | "customers who buy X also buy Y" |
+| Collaborative | Jaccard similarity between customers | "customers similar to you bought this" |
+| Embeddings | cosine over co-purchase vectors | "appears in similar purchase contexts" |
+| Trend | recent vs previous window momentum | "up N% in the last 30 days" |
+| Hybrid | normalized, weighted blend of all of the above | "driven mainly by <component>" |
+
 ## Architecture
 
 ```text
-HTTP API
+HTTP API  /  CLI  /  live graph viewer
   |
   v
-Recommendation Engine
+Recommendation Engine  (event-driven, learns incrementally)
   |
-  +--> Event Store
-  +--> Product Statistics
-  +--> Ranking Strategies
+  +--> Event Store (memory | PostgreSQL)
+  +--> Statistics --> Popular ranking
+  +--> Co-purchase graph --> Association ranking (x feedback loop)
+  +--> Customer profiles --> Collaborative filtering
+  +--> Product embeddings --> taste-profile scoring
+  +--> Trend tracker --> momentum
+  +--> Hybrid ranker (weighted blend) --> A/B experiments
+  +--> Evaluation harness (offline benchmark)
 ```
 
 More detail: [Architecture](docs/ARCHITECTURE.md)
@@ -255,15 +282,16 @@ assets/
 
 ## Roadmap
 
-Current direction:
+All phases implemented:
 
 - Phase 1: event ingestion, storage, statistics, popular products
 - Phase 2: co-purchase graph, associations, similarity
 - Phase 3: collaborative filtering and explainable ranking
-- Phase 4: ML-assisted and hybrid recommendation
-- Phase 5: streaming, feedback loops, experimentation
+- Phase 4: embeddings, trend signals, hybrid ranking, evaluation
+- Phase 5: streaming, real-time refresh, A/B experiments
 
-Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+Next: persist precomputed statistics and graph, and add automated PostgreSQL
+integration coverage. Full roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## Design principles
 
@@ -288,7 +316,11 @@ The engine is intentionally domain-agnostic:
 
 ## Status
 
-This repository is in active early development, but the current codebase is runnable and already demonstrates the first recommendation layer end to end.
+All five roadmap phases are implemented and covered by unit tests. Every strategy is
+runnable end to end through the HTTP API, the CLI, and the live graph viewer, against
+either the in-memory store or PostgreSQL. It remains a research project: the model is
+rebuilt in memory from the event log on startup rather than served from precomputed,
+persisted features.
 
 ## License
 

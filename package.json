@@ -33,6 +33,7 @@
     "playground": "bun run ./apps/playground/src/demo.ts",
     "check": "tsc --noEmit",
     "test": "bun test",
+    "test:pg": "RUN_PG_TESTS=1 bun test packages/storage/src/postgres-event-store.integration.test.ts",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f postgres",
