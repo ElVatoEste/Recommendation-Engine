@@ -8,13 +8,7 @@ export function createEventStoreFromEnvironment(
   const connectionString = environment.DATABASE_URL?.trim();
 
   if (connectionString) {
-    const maxConnections = Number(environment.DATABASE_POOL_MAX);
-
-    return new PostgresEventStore(connectionString, {
-      maxConnections: Number.isFinite(maxConnections) && maxConnections > 0
-        ? maxConnections
-        : undefined,
-    });
+    return new PostgresEventStore(connectionString);
   }
 
   return new InMemoryEventStore();

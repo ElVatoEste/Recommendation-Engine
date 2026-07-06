@@ -2,22 +2,11 @@ import { Pool } from "pg";
 
 import type { EventStore, RecommendationEvent } from "../../shared/src/index.ts";
 
-export interface PostgresEventStoreOptions {
-  maxConnections?: number;
-  idleTimeoutMillis?: number;
-  connectionTimeoutMillis?: number;
-}
-
 export class PostgresEventStore implements EventStore {
   private readonly pool: Pool;
 
-  constructor(connectionString: string, options: PostgresEventStoreOptions = {}) {
-    this.pool = new Pool({
-      connectionString,
-      max: options.maxConnections ?? 10,
-      idleTimeoutMillis: options.idleTimeoutMillis ?? 30_000,
-      connectionTimeoutMillis: options.connectionTimeoutMillis ?? 10_000,
-    });
+  constructor(connectionString: string) {
+    this.pool = new Pool({ connectionString });
   }
 
   async append(event: RecommendationEvent): Promise<void> {
