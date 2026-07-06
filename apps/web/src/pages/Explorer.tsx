@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { GraphScene } from "@/components/GraphScene";
 import { ScoreBars } from "@/components/ScoreBars";
 import { SectionCard } from "@/components/SectionCard";
+import { Segmented, Select } from "@/components/ui";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { observatoryApi } from "@/lib/api";
 import type { GraphNode } from "@/lib/contracts";
@@ -164,78 +165,52 @@ export default function Explorer() {
 
   return (
     <div className="stagger space-y-6 pt-2">
-      <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(4,120,87,0.26),rgba(15,23,42,0.94)_40%,rgba(2,8,23,0.96))] p-6 md:p-8 xl:p-10">
-        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/12 px-3 py-1 text-[11px] uppercase tracking-[0.34em] text-emerald-100">
-              <span aria-hidden="true">◎</span>
-              Explorador de recomendaciones
-            </span>
-            <h1 className="font-display text-5xl leading-[0.96] text-white md:text-6xl">
-              Entra por entidad, sal por explicación.
-            </h1>
-            <p className="max-w-2xl text-base leading-7 text-slate-300">
-              Cambia entre producto y cliente para inspeccionar conexiones, rankings
-              y composición de score. La idea es que entiendas la recomendación sin
-              abrir el código del motor.
-            </p>
-          </div>
-
-          <div className="grid gap-4">
-            <div className="flex flex-wrap gap-3">
-              {(["producto", "cliente"] as ExplorerView[]).map((entry) => (
-                <button
-                  key={entry}
-                  type="button"
-                  onClick={() => setView(entry)}
-                  className={`rounded-full border px-4 py-2.5 text-sm transition-[background-color,border-color,transform] duration-200 ease-[var(--ease-out-strong)] active:scale-[0.97] ${
-                    view === entry
-                      ? "border-cyan-300/20 bg-cyan-300 text-slate-950 shadow-[0_12px_30px_-14px_rgba(103,232,249,0.85)]"
-                      : "border-white/12 bg-white/[0.03] text-white hover:border-white/20 hover:bg-white/[0.06]"
-                  }`}
-                >
-                  {entry === "producto" ? "Vista producto" : "Vista cliente"}
-                </button>
-              ))}
-            </div>
-
-            <div className="grid gap-3 rounded-[28px] border border-white/10 bg-slate-950/55 p-5 md:grid-cols-2">
-              <label className="space-y-2">
-                <span className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
-                  Producto foco
-                </span>
-                <select
-                  value={selectedProductId}
-                  onChange={(event) => setSelectedProductId(event.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out-strong)] outline-none hover:border-white/20 focus-visible:border-cyan-300/50 focus-visible:ring-2 focus-visible:ring-cyan-300/30"
-                >
-                  {(baseState.data?.stats ?? []).map((item) => (
-                    <option key={item.productId} value={item.productId}>
-                      {item.productId}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="space-y-2">
-                <span className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
-                  Cliente foco
-                </span>
-                <select
-                  value={selectedCustomerId}
-                  onChange={(event) => setSelectedCustomerId(event.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white transition-[border-color,box-shadow] duration-200 ease-[var(--ease-out-strong)] outline-none hover:border-white/20 focus-visible:border-cyan-300/50 focus-visible:ring-2 focus-visible:ring-cyan-300/30"
-                >
-                  {(baseState.data?.customers ?? []).map((item) => (
-                    <option key={item.customerId} value={item.customerId}>
-                      {item.customerId}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-xl">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+            Entity explorer
+          </h1>
+          <p className="mt-1 text-sm text-neutral-400">
+            Inspect one product or customer and read every ranking, connection and
+            score breakdown the engine holds for it.
+          </p>
         </div>
-      </section>
+
+        <div className="flex flex-wrap items-end gap-3">
+          <Segmented
+            value={view}
+            onChange={(v) => setView(v as ExplorerView)}
+            options={[
+              { value: "producto", label: "Product" },
+              { value: "cliente", label: "Customer" },
+            ]}
+          />
+          <Select
+            label="Product"
+            value={selectedProductId}
+            onChange={(event) => setSelectedProductId(event.target.value)}
+            className="min-w-40"
+          >
+            {(baseState.data?.stats ?? []).map((item) => (
+              <option key={item.productId} value={item.productId}>
+                {item.productId}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label="Customer"
+            value={selectedCustomerId}
+            onChange={(event) => setSelectedCustomerId(event.target.value)}
+            className="min-w-40"
+          >
+            {(baseState.data?.customers ?? []).map((item) => (
+              <option key={item.customerId} value={item.customerId}>
+                {item.customerId}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </div>
 
       {view === "producto" ? (
         <div className="space-y-6">

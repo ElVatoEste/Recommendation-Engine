@@ -36,44 +36,36 @@ export default function Laboratory() {
 
   return (
     <div className="stagger space-y-6 pt-2">
-      <section className="rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,rgba(76,29,149,0.35),rgba(15,23,42,0.94)_45%,rgba(2,8,23,0.96))] p-6 md:p-8 xl:p-10">
-        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-400/12 px-3 py-1 text-[11px] uppercase tracking-[0.34em] text-violet-100">
-              <span aria-hidden="true">✦</span>
-              Laboratorio del algoritmo
-            </span>
-            <h1 className="font-display text-5xl leading-[0.96] text-white md:text-6xl">
-              Reproduce la lógica, no solo el resultado.
-            </h1>
-            <p className="max-w-2xl text-base leading-7 text-slate-300">
-              Esta pantalla toma eventos reales del motor y los convierte en playback.
-              Puedes ver qué entra, qué se actualiza y cómo se justifica el cambio de
-              ranking paso por paso.
-            </p>
-          </div>
-
-          <div className="rounded-[28px] border border-white/10 bg-slate-950/55 p-6">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-500">
-              Estado del reproductor
-            </p>
-            <p className="mt-4 text-3xl text-white">
-              {loading
-                ? "Cargando..."
-                : currentStep
-                  ? `${player.currentIndex + 1} / ${steps.length}`
-                  : "Sin pasos"}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              {error
-                ? error
-                : currentStep
-                  ? `${formatEventType(currentStep.event.type)} en etapa ${currentStep.stage}.`
-                  : "Necesitas eventos en el motor para generar playback."}
-            </p>
-          </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-xl">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-white">
+            Step playback
+          </h1>
+          <p className="mt-1 text-sm text-neutral-400">
+            Replay real engine events one at a time and watch the aggregates, graph
+            and ranking shift at each step.
+          </p>
         </div>
-      </section>
+        <div className="rounded-xl border border-line bg-panel px-4 py-3 text-right">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-neutral-500">
+            Player
+          </p>
+          <p className="tnum mt-1 text-2xl font-semibold text-white">
+            {loading
+              ? "…"
+              : currentStep
+                ? `${player.currentIndex + 1} / ${steps.length}`
+                : "0"}
+          </p>
+          <p className="mt-0.5 text-xs text-neutral-500">
+            {error
+              ? error
+              : currentStep
+                ? `${formatEventType(currentStep.event.type)} · ${currentStep.stage}`
+                : "Needs events to build playback."}
+          </p>
+        </div>
+      </div>
 
       <SectionCard
         eyebrow="Playback"
@@ -86,7 +78,7 @@ export default function Laboratory() {
               type="button"
               onClick={() => player.setPlaying(!player.playing)}
               disabled={steps.length <= 1}
-              className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300 px-4 py-2.5 text-sm font-medium text-slate-950 shadow-[0_12px_30px_-14px_rgba(103,232,249,0.85)] transition-[background-color,transform,opacity] duration-200 ease-[var(--ease-out-strong)] hover:bg-cyan-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+              className="inline-flex items-center gap-2 rounded-md border border-accent/30 bg-accent px-4 py-2.5 text-sm font-medium text-black transition-[background-color,transform,opacity] duration-200 ease-[var(--ease-out-strong)] hover:bg-amber-300 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
             >
               <span aria-hidden="true">{player.playing ? "▌▌" : "▶"}</span>
               {player.playing ? "Pausar" : "Reproducir"}

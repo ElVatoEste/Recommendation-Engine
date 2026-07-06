@@ -33,10 +33,10 @@ export function PipelineStages({ activeStage }: PipelineStagesProps) {
         return (
           <article
             key={stage.id}
-            className={`relative overflow-hidden rounded-[24px] border p-5 transition-[background-color,border-color,transform,box-shadow] duration-300 ease-[var(--ease-out-strong)] ${
+            className={`relative overflow-hidden rounded-xl border p-5 transition-[background-color,border-color,transform,box-shadow] duration-300 ease-[var(--ease-out-strong)] ${
               active
-                ? "-translate-y-0.5 border-cyan-300/25 bg-cyan-400/12 shadow-[0_18px_44px_-20px_rgba(34,211,238,0.65)]"
-                : "border-white/8 bg-white/[0.025] hover:border-white/15 hover:bg-white/[0.04]"
+                ? "-translate-y-0.5 border-accent/30 bg-accent/[0.08] shadow-[0_18px_44px_-20px_rgba(245,165,36,0.6)]"
+                : "border-line bg-panel-2 hover:border-line-strong"
             }`}
           >
             <div className="mb-6 flex items-center justify-between gap-3">
@@ -46,7 +46,7 @@ export function PipelineStages({ activeStage }: PipelineStagesProps) {
               <span
                 className={`h-2.5 w-2.5 rounded-full ${
                   active
-                    ? "bg-cyan-300 shadow-[0_0_24px_rgba(103,232,249,0.8)]"
+                    ? "bg-accent shadow-[0_0_20px_rgba(245,165,36,0.8)]"
                     : "bg-white/15"
                 }`}
               />

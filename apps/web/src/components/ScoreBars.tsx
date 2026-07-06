@@ -14,18 +14,17 @@ interface ScoreBarsProps {
   mode?: "score" | "percent";
 }
 
-const toneClassMap = {
-  cyan: "from-cyan-300 to-sky-400",
-  emerald: "from-emerald-300 to-lime-400",
-  violet: "from-violet-300 to-fuchsia-400",
-  amber: "from-amber-300 to-orange-400",
-} as const;
+const toneColor: Record<NonNullable<ScoreBarItem["tone"]>, string> = {
+  cyan: "var(--color-accent)",
+  emerald: "var(--color-s-collab)",
+  violet: "var(--color-s-assoc)",
+  amber: "var(--color-s-pop)",
+};
 
 export function ScoreBars({ items, mode = "score" }: ScoreBarsProps) {
   const safeItems = items.filter((item) => Number.isFinite(item.value));
   const maxValue = Math.max(...safeItems.map((item) => item.value), 1);
 
-  // Grow bars from 0 after mount so the ranking reads as it settles.
   const [grown, setGrown] = useState(false);
   useEffect(() => {
     const raf = requestAnimationFrame(() => setGrown(true));
@@ -34,43 +33,51 @@ export function ScoreBars({ items, mode = "score" }: ScoreBarsProps) {
 
   if (safeItems.length === 0) {
     return (
-      <div className="rounded-[22px] border border-dashed border-white/10 bg-white/[0.02] px-4 py-5 text-sm text-slate-500">
-        No hay señales suficientes para comparar estrategias todavía.
+      <div className="rounded-md border border-dashed border-line px-4 py-5 text-sm text-neutral-500">
+        No signal to compare yet.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <ol className="flex flex-col">
       {safeItems.map((item, index) => {
-        const target = Math.max((item.value / maxValue) * 100, 6);
+        const target = Math.max((item.value / maxValue) * 100, 2);
+        const color = toneColor[item.tone ?? "cyan"];
         return (
-          <div key={`${item.label}-${item.caption}`} className="group/bar space-y-2">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-sm text-slate-100">{item.label}</p>
-                <p className="text-xs text-slate-500">{item.caption}</p>
-              </div>
-              <p className="text-sm tabular-nums text-slate-300">
+          <li
+            key={`${item.label}-${item.caption}`}
+            className="border-b border-line/60 py-2 last:border-b-0"
+          >
+            <div className="flex items-baseline justify-between gap-4">
+              <span className="min-w-0 flex-1 truncate text-sm text-white">
+                {item.label}
+              </span>
+              <span className="tnum shrink-0 text-sm text-neutral-300">
                 {mode === "percent"
                   ? formatPercent(item.value)
                   : formatCompactNumber(item.value)}
-              </p>
+              </span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-white/[0.05]">
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
               <div
-                className={`h-full rounded-full bg-gradient-to-r ${toneClassMap[item.tone ?? "cyan"]}`}
+                className="h-full rounded-full"
                 style={{
                   width: grown ? `${target}%` : "0%",
-                  transition:
-                    "width 720ms var(--ease-out-strong)",
-                  transitionDelay: `${index * 60}ms`,
+                  backgroundColor: color,
+                  transition: "width 640ms var(--ease-out-strong)",
+                  transitionDelay: `${index * 45}ms`,
                 }}
               />
             </div>
-          </div>
+            {item.caption && (
+              <p className="mt-1 text-xs leading-relaxed text-neutral-500">
+                {item.caption}
+              </p>
+            )}
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }
